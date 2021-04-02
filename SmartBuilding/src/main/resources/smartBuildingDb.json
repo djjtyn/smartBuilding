@@ -1,4 +1,5 @@
 {"occupant": [
+	//All occupants have access to ground floor (0). Occupant rooms start at floor 1
 	{"id":1,"name":"Cami Beine","roomFloor":1,"roomNumber":1,"accessToFloor":[0]},
 	{"id":2,"name":"Waite Rheam","roomFloor":1,"roomNumber":2,"accessToFloor":[0]},
 	{"id":3,"name":"Debera Crosston","roomFloor":1,"roomNumber":2,"accessToFloor":[0]},

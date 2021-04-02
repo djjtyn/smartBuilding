@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "grpc.elevatorService";
+option java_outer_classname = "ElevatorServiceImpl";
+
+package elevatorService;
+
+//Create the rpc methods
+service elevator{
+	//Bidirectional streaming rpc
+	rpc moveElevator(stream ElevatorRequest) returns (stream ElevatorResponse){}
+	//unary streaming rpc
+	rpc returnToGroundFloor(Elevator) returns (ElevatorResponse){}
+}
+
+//Create the messages
+//Occupant Message to be used in ElevatorRequest message
+message Occupant{
+	int32 id = 1;
+	string name = 2;
+	int32 roomFloor = 3;
+	int32 roomNumber = 4;
+	repeated int32 accessToFloor = 5;
+}
+
+//Elevator Message to be used in ElevatorRequest message
+message Elevator{
+	int32 id = 1;
+	int32 currentFloor = 2;
+	int32 destinationFLoor = 3;
+	int32 lowestFloor = 4;
+	int32 highestFloor = 5;
+	int32 capacityLimit = 6;
+	int32 currentCapacity = 7;
+	bool isMoving = 8;
+	enum travelDirection{
+		UP = 0;
+		DOWN = 1;
+	}
+	travelDirection tDirection = 9;
+
+}
+
+message ElevatorRequest{
+	Occupant occupant = 1;
+	Elevator elevator = 2;
+	int32 currentFloor = 3;
+	repeated int32 destinationFloor = 4;
+}
+
+message ElevatorResponse{
+	string elevatorMessage = 1;
+	int32 currentFloor = 2;
+	int32 nextFloor = 3;
+}

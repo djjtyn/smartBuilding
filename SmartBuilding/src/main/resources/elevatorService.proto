@@ -54,3 +54,7 @@ message ElevatorResponse{
 	int32 currentFloor = 2;
 	int32 nextFloor = 3;
 }
+
+message OccupantDatabase{
+	repeated Occupant occupant = 1;
+}

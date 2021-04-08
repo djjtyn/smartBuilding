@@ -2,42 +2,54 @@
 
 package grpc.elevatorService;
 
-import com.google.protobuf.util.JsonFormat;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InputStream;
-import java.io.Reader;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.List;
+import java.util.ArrayList;
 
 public class OccupantDb {
-
-	// Gets the smartBuilding Database data
-	public static URL getDatabase() {
-		return ElevatorServer.class.getResource("smartBuildingDb.json");
-	}
-
-	// Read occupant data from the smartBuildingDb file
-	public static List<Occupant> parseDatabase(URL file) throws IOException {
-		InputStream input = file.openStream();
-		try {
-			Reader reader = new InputStreamReader(input, Charset.forName("UTF-8"));
-			try {
-				OccupantDatabase.Builder occupantDb = OccupantDatabase.newBuilder();
-				JsonFormat.parser().merge(reader, occupantDb);
-				return occupantDb.getOccupantList();
-			} finally {
-				reader.close();
-			}
-		} finally {
-			input.close();
-		}
+	
+	private int id;
+	private String name;
+	private int roomFloor;
+	private int roomNumber;
+	ArrayList<Integer> accessToFloor = new ArrayList<>();
+	
+	//constructor
+	public OccupantDb(int id, String name, int roomFloor, int roomNumber, ArrayList<Integer> accessToFloor) {
+		this.id = id;
+		this.name = name;
+		this.roomFloor = roomFloor;
+		this.roomNumber = roomNumber;
+		this.accessToFloor = accessToFloor;
+		
 	}
 	
-	//Gets the floor number for a particular user
-	public static int getFloorNumber(Occupant person) {
-		return person.getRoomFloor();
+	public int getId() {
+		return id;
 	}
-
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public int getRoomFloor() {
+		return roomFloor;
+	}
+	public void setRoomFloor(int roomFloor) {
+		this.roomFloor = roomFloor;
+	}
+	public int getRoomNumber() {
+		return roomNumber;
+	}
+	public void setRoomNumber(int roomNumber) {
+		this.roomNumber = roomNumber;
+	}
+	public ArrayList<Integer> getAccessToFloor() {
+		return accessToFloor;
+	}
+	public void setAccessToFloor(ArrayList<Integer> accessToFloor) {
+		this.accessToFloor = accessToFloor;
+	}
 }

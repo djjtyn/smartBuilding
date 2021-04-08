@@ -1,12 +1,26 @@
 package grpc.elevatorService;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
+
 
 public class ElevatorServer {
 	
@@ -14,11 +28,23 @@ public class ElevatorServer {
 	private final int PORT = 50051;
 	private static final Logger LOGGER = Logger.getLogger(ElevatorServer.class.getName());
 	private Server server;
-	
+		
 	//MAIN METHOD
 	public static void main(String[] args) throws IOException, InterruptedException {
+		
 		//Instantiate the elevator server class
 		final ElevatorServer elevatorServer = new ElevatorServer();
+		//Get the database and create OccupantDb records with i
+		JsonObject object = (JsonObject) new JsonParser().parse(new FileReader("src/main/resources/smartBuildingDb.json"));
+        JsonArray occupantsJson = (JsonArray) object.get("occupant");
+        ArrayList<Object> occupants = new ArrayList<>(occupantsJson.size());
+
+        //loops through the Json data and assigns each occupant their own OccuppantDb instance
+        for(int i=0; i<occupantsJson.size(); i++){
+        	occupants.add(i, occupantsJson.get(i));
+        }
+
+		
 		elevatorServer.start();
 		elevatorServer.blockUntilShutdown();
 	}
@@ -63,17 +89,20 @@ public class ElevatorServer {
 	static class ElevatorImpl extends elevatorGrpc.elevatorImplBase{
 
 		@Override
-		public StreamObserver<ElevatorRequest> moveElevator(StreamObserver<ElevatorResponse> responseObserver) {
+		public StreamObserver<ElevatorRequest> moveElevator( final StreamObserver<ElevatorResponse> responseObserver) {
 			return new StreamObserver<ElevatorRequest>() {
-				//elevator capacity is 10 people at a time
-				final int CURRENTCAPACITY = 10;
+				final int CAPACITYLIMIT = 10;	//elevator capacity is 10 people at a time
+				int peopleCount = 0;	//this will keep track of how many people get into the elevator
 				int currentFloor;
 				//int destinationFloor
 					
 		
 				@Override
 				public void onNext(ElevatorRequest value) {
-					// TODO Auto-generated method stub
+					peopleCount++;
+					Occupant occupant = value.getOccupant();
+					
+					
 					
 				}
 				@Override

@@ -10,10 +10,10 @@ public class OccupantDb {
 	private String name;
 	private int roomFloor;
 	private int roomNumber;
-	ArrayList<Integer> accessToFloor = new ArrayList<>();
+	private int accessToFloor;
 	
 	//constructor
-	public OccupantDb(int id, String name, int roomFloor, int roomNumber, ArrayList<Integer> accessToFloor) {
+	public OccupantDb(int id, String name, int roomFloor, int roomNumber, int accessToFloor) {
 		this.id = id;
 		this.name = name;
 		this.roomFloor = roomFloor;
@@ -22,6 +22,10 @@ public class OccupantDb {
 		
 	}
 	
+	public OccupantDb(int parseInt, String name2, String string, String string2, String string3) {
+		// TODO Auto-generated constructor stub
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -46,10 +50,10 @@ public class OccupantDb {
 	public void setRoomNumber(int roomNumber) {
 		this.roomNumber = roomNumber;
 	}
-	public ArrayList<Integer> getAccessToFloor() {
+	public int getAccessToFloor() {
 		return accessToFloor;
 	}
-	public void setAccessToFloor(ArrayList<Integer> accessToFloor) {
+	public void setAccessToFloor(int accessToFloor) {
 		this.accessToFloor = accessToFloor;
 	}
 }

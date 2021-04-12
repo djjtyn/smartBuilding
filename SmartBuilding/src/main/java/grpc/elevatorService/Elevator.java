@@ -146,6 +146,10 @@ private static final long serialVersionUID = 0L;
      * <code>DOWN = 1;</code>
      */
     DOWN(1),
+    /**
+     * <code>STATIONARY = 2;</code>
+     */
+    STATIONARY(2),
     UNRECOGNIZED(-1),
     ;
 
@@ -157,6 +161,10 @@ private static final long serialVersionUID = 0L;
      * <code>DOWN = 1;</code>
      */
     public static final int DOWN_VALUE = 1;
+    /**
+     * <code>STATIONARY = 2;</code>
+     */
+    public static final int STATIONARY_VALUE = 2;
 
 
     public final int getNumber() {
@@ -179,6 +187,7 @@ private static final long serialVersionUID = 0L;
       switch (value) {
         case 0: return UP;
         case 1: return DOWN;
+        case 2: return STATIONARY;
         default: return null;
       }
     }

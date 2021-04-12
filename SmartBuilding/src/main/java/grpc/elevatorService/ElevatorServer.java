@@ -1,7 +1,5 @@
 package grpc.elevatorService;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +30,6 @@ public class ElevatorServer {
 
 		// Instantiate the elevator server class
 		final ElevatorServer elevatorServer = new ElevatorServer();
-	
 
 		elevatorServer.start();
 		elevatorServer.blockUntilShutdown();
@@ -78,32 +75,65 @@ public class ElevatorServer {
 		@Override
 		public StreamObserver<ElevatorRequest> moveElevator(final StreamObserver<ElevatorResponse> responseObserver) {
 			return new StreamObserver<ElevatorRequest>() {
-				final int CAPACITYLIMIT = 10; // elevator capacity is 10 people at a time
-				int peopleCount = 0; // this will keep track of how many people get into the elevator
+				int peopleCount; // this will keep track of how many people get into the elevator
 				int currentFloor = 0;
-				int occupantId;
 				int destinationFloor;
 				String elevatorDetails;
-				ArrayList<Integer> destinationFloors = new ArrayList<>();	//create an arraylist to store the destination floors
-
+				ArrayList<Integer> eOneDestinationFloors = new ArrayList<>(); // create an arraylist to store the destination floors for elevator 1
+				ArrayList<Integer> eTwoDestinationFloors = new ArrayList<>(); // create an arraylist to store the destination floors for elevator 2
+				ArrayList<Integer> eThreeDestinationFloors = new ArrayList<>(); // create an arraylist to store the destination floors for elevator 3
 				@Override
 				public void onNext(ElevatorRequest value) {
-					peopleCount++; // Increase the people count for every new person to get into the elevator
-					int occupantId = value.getOccupant().getId();
-					 destinationFloor = value.getOccupant().getRoomFloor();
-					 //Add the destination floor to the floors arrayList if it isn't in the list
-					 if(!destinationFloors.contains(destinationFloor)) {
-						 destinationFloors.add(destinationFloor);
+					int elevatorId = value.getElevator().getId();
+					// If the elevator in use is elevatorId 1
+					if (elevatorId == 1) {
+						peopleCount++; // Increase the people count for every new person to get into the elevator
+						// If the elevator has too many people in it (>8)
+						if (peopleCount > value.getElevator().getCapacityLimit()) {
+							System.out.println("Elevator has " + peopleCount
+									+ " people in it. Maximum capacity the elevator can accept is "
+									+ value.getElevator().getCapacityLimit());
+						} else {
+							System.out.println(
+									"Receiving Elevator Request from occupant id " + value.getOccupant().getId()
+											+ " to go from " + value.getElevator().getTDirectionValue() + " to floor "
+											+ value.getOccupant().getRoomFloor() + " using elevator id " + elevatorId);
+						}
+						// Add the destination floor to the floors arrayList if it isn't in the list
+						if (!eOneDestinationFloors.contains(value.getOccupant().getRoomFloor())) {
+							eOneDestinationFloors.add(value.getOccupant().getRoomFloor());
+						}
 							ElevatorResponse response = ElevatorResponse.newBuilder()
-									.setElevatorMessage("Elevator going to floor(s) " + destinationFloors + ". Next floor: " + destinationFloor)
+									.setElevatorMessage("Elevator 1 going " + value.getElevator().getTDirectionValue() + " to floor(s) " + 
+							eOneDestinationFloors + ". Next floor: " + eOneDestinationFloors.get(0))
 									.setNextFloor(destinationFloor).setCurrentFloor(currentFloor).build();
 							responseObserver.onNext(response);
-							currentFloor = destinationFloor;	//change the currentFloor value to the occupants destination floor
-	
-					 }
-					//if the destinationFloors array only has one instance of the users destination floor
-
-					//if there is a rquest for afloor that already exists
+							currentFloor = destinationFloor; // change the currentFloor value to the occupants
+																// destination floor
+						}
+						if (elevatorId == 2) {
+							if (!eTwoDestinationFloors.contains(destinationFloor)) {
+									eTwoDestinationFloors.add(destinationFloor);
+							}
+									ElevatorResponse response2 = ElevatorResponse.newBuilder()
+											.setElevatorMessage("Elevator 2 going to floor(s) " + eTwoDestinationFloors
+													+ ". Next floor: " + destinationFloor)
+											.setNextFloor(destinationFloor).setCurrentFloor(currentFloor).build();
+									responseObserver.onNext(response2);
+									currentFloor = destinationFloor; // change the currentFloor value to the occupants destination floor
+						if (elevatorId == 3) {
+							if (!eThreeDestinationFloors.contains(destinationFloor)) {
+								eThreeDestinationFloors.add(destinationFloor);
+							}
+							ElevatorResponse response3 = ElevatorResponse.newBuilder()
+									.setElevatorMessage("Elevator 3 going to floor(s) " + eThreeDestinationFloors
+											+ ". Next floor: " + destinationFloor)
+									.setNextFloor(destinationFloor).setCurrentFloor(currentFloor).build();
+							responseObserver.onNext(response3);
+							currentFloor = destinationFloor; // change the currentFloor value to the occupants
+																// destination floor
+						}
+					}
 				}
 
 				@Override
@@ -113,9 +143,12 @@ public class ElevatorServer {
 
 				@Override
 				public void onCompleted() {
-					for(int i = 0;i<peopleCount;i++) {
-						
-					}
+					ElevatorResponse response = ElevatorResponse.newBuilder()
+							.setElevatorMessage("Elevator 1 going to floor(s) " + eOneDestinationFloors
+									+ ". Next floor: " + destinationFloor)
+							.setNextFloor(destinationFloor).setCurrentFloor(currentFloor).build();
+					responseObserver.onNext(response);
+					responseObserver.onCompleted();
 
 				}
 

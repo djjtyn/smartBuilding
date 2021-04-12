@@ -51,28 +51,28 @@ public final class ElevatorServiceImpl {
       "\n\025elevatorService.proto\022\017elevatorService" +
       "\"b\n\010Occupant\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\021" +
       "\n\troomFloor\030\003 \001(\005\022\022\n\nroomNumber\030\004 \001(\005\022\025\n" +
-      "\raccessToFloor\030\005 \003(\005\"\227\002\n\010Elevator\022\n\n\002id\030" +
+      "\raccessToFloor\030\005 \003(\005\"\247\002\n\010Elevator\022\n\n\002id\030" +
       "\001 \001(\005\022\024\n\014currentFloor\030\002 \001(\005\022\030\n\020destinati" +
       "onFLoor\030\003 \001(\005\022\023\n\013lowestFloor\030\004 \001(\005\022\024\n\014hi" +
       "ghestFloor\030\005 \001(\005\022\025\n\rcapacityLimit\030\006 \001(\005\022" +
       "\027\n\017currentCapacity\030\007 \001(\005\022\020\n\010isMoving\030\010 \001" +
       "(\010\022=\n\ntDirection\030\t \001(\0162).elevatorService" +
-      ".Elevator.travelDirection\"#\n\017travelDirec" +
-      "tion\022\006\n\002UP\020\000\022\010\n\004DOWN\020\001\"\233\001\n\017ElevatorReque" +
-      "st\022+\n\010occupant\030\001 \001(\0132\031.elevatorService.O" +
-      "ccupant\022+\n\010elevator\030\002 \001(\0132\031.elevatorServ" +
-      "ice.Elevator\022\024\n\014currentFloor\030\003 \001(\005\022\030\n\020de" +
-      "stinationFloor\030\004 \003(\005\"T\n\020ElevatorResponse" +
-      "\022\027\n\017elevatorMessage\030\001 \001(\t\022\024\n\014currentFloo" +
-      "r\030\002 \001(\005\022\021\n\tnextFloor\030\003 \001(\005\"?\n\020OccupantDa" +
-      "tabase\022+\n\010occupant\030\001 \003(\0132\031.elevatorServi" +
-      "ce.Occupant2\274\001\n\010elevator\022Y\n\014moveElevator" +
-      "\022 .elevatorService.ElevatorRequest\032!.ele" +
-      "vatorService.ElevatorResponse\"\000(\0010\001\022U\n\023r" +
-      "eturnToGroundFloor\022\031.elevatorService.Ele" +
-      "vator\032!.elevatorService.ElevatorResponse" +
-      "\"\000B-\n\024grpc.elevatorServiceB\023ElevatorServ" +
-      "iceImplP\001b\006proto3"
+      ".Elevator.travelDirection\"3\n\017travelDirec" +
+      "tion\022\006\n\002UP\020\000\022\010\n\004DOWN\020\001\022\016\n\nSTATIONARY\020\002\"\233" +
+      "\001\n\017ElevatorRequest\022+\n\010occupant\030\001 \001(\0132\031.e" +
+      "levatorService.Occupant\022+\n\010elevator\030\002 \001(" +
+      "\0132\031.elevatorService.Elevator\022\024\n\014currentF" +
+      "loor\030\003 \001(\005\022\030\n\020destinationFloor\030\004 \003(\005\"T\n\020" +
+      "ElevatorResponse\022\027\n\017elevatorMessage\030\001 \001(" +
+      "\t\022\024\n\014currentFloor\030\002 \001(\005\022\021\n\tnextFloor\030\003 \001" +
+      "(\005\"?\n\020OccupantDatabase\022+\n\010occupant\030\001 \003(\013" +
+      "2\031.elevatorService.Occupant2\274\001\n\010elevator" +
+      "\022Y\n\014moveElevator\022 .elevatorService.Eleva" +
+      "torRequest\032!.elevatorService.ElevatorRes" +
+      "ponse\"\000(\0010\001\022U\n\023returnToGroundFloor\022\031.ele" +
+      "vatorService.Elevator\032!.elevatorService." +
+      "ElevatorResponse\"\000B-\n\024grpc.elevatorServi" +
+      "ceB\023ElevatorServiceImplP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

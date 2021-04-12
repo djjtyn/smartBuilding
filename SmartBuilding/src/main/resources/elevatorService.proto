@@ -37,6 +37,7 @@ message Elevator{
 	enum travelDirection{
 		UP = 0;
 		DOWN = 1;
+		STATIONARY = 2;
 	}
 	travelDirection tDirection = 9;
 

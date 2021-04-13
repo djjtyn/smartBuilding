@@ -1,4 +1,4 @@
-package client;
+package grpc.elevatorService;
 
 import java.io.File;
 import java.io.FileReader;
@@ -28,45 +28,26 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import java.awt.EventQueue;
 
-public class Client {
-	private static final Logger logger = Logger.getLogger(Client.class.getName());
-
-	// Create the stubs
-	private elevatorGrpc.elevatorBlockingStub blockingStub;
-	private static elevatorGrpc.elevatorStub asyncStub;
-
-	// Create client constructor
-	/**
-	 * @wbp.parser.entryPoint
-	 */
-	public Client(Channel channel) {
-		this.blockingStub = elevatorGrpc.newBlockingStub(channel);
-		asyncStub = elevatorGrpc.newStub(channel);
-	}
-
+public class ElevatorClient {
+	private static elevatorBlockingStub blockingStub;
+	private static elevatorStub asyncStub;
+	
 	// This arraylist will contain the database for the occupants
 	static ArrayList<OccupantDb> occupants = new ArrayList<>();
 
 	// This arraylist will contain the elevator details
 	static ArrayList<ElevatorDb> elevators = new ArrayList<>();
-	
-	//Create JFrame to use for GUI
-	private JFrame frame;
-	
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
 
-	/**
-	 * @wbp.parser.entryPoint
-	 */
 	public static void main(String[] args) throws Exception {
+		final Logger logger = Logger.getLogger(ElevatorClient.class.getName());
+		ManagedChannel channel = ManagedChannelBuilder
+				.forAddress("localhost", 50051)
+				.usePlaintext()
+				.build();
+		//stubs -- generate from proto
+		blockingStub = elevatorGrpc.newBlockingStub(channel);
 
+		asyncStub = elevatorGrpc.newStub(channel);
 		// Get the occupant data from the occupantData CSV file and create Occupant
 		// records with it
 		Scanner sc = new Scanner(new File("src/main/resources/occupantData.csv"));
@@ -91,7 +72,7 @@ public class Client {
 		elevators.add(0, new ElevatorDb(2, 0, 0, 0, false));
 		elevators.add(0, new ElevatorDb(3, 0, 0, 0, false));
 
-		 moveElevator();
+		moveElevator();
 	}
 
 	// A search method to make sure the correct occupant record is being read to
@@ -133,45 +114,49 @@ public class Client {
 	// Methods from server
 	public static void moveElevator() {
 		Scanner sc = new Scanner(System.in);
-		System.out.println("What is your occupant id?");
-		int occupantId = sc.nextInt();
-		System.out.println("What elevator number is being used?");
+		System.out.println("What elevator number are you using?");
 		int elevatorId = sc.nextInt();
+		System.out.println("How many people are using the elevator?");
+		int peopleAmount = sc.nextInt();
+		//Create an array of people size
+		int[]occupantAmount = new int[peopleAmount];
+		int occupantId = 0;
+		for(int i=0;i<occupantAmount.length;i++) {
+			System.out.println("Person " + (i+1) + ". What is your occupant id?");
+			occupantId = sc.nextInt();
+			occupantAmount[i] = occupantId;
+		}
 		sc.close();
 		// Assign the Occupant values based on the occupant Id
-		int occupantIndex = binarySearch(occupants, 0, occupants.size() - 1, occupantId);
-		int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
-		int roomNumber = occupants.get(occupantIndex).getRoomNumber();
-		String occupantName = occupants.get(occupantIndex).getName();
-		// Assign the Elevator values based on the elevator id
-		int elevatorIndex = linearSearch(elevators, elevatorId);
-		int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
-		int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
-		int lowestFloor = 0;
-		int highestFloor = 10;
-		int capacityLimit = 8;
-		boolean isMoving = elevators.get(elevatorIndex).getIsMoving();
-		int tDirection = 3;
-		// if the elevator is moving and the current floor is below the destination
-		// floor the travel direction is up
-		if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex).getCurrentFLoor() < elevators
-				.get(elevatorIndex).getDestinationFloor()) {
-			tDirection = 0;
-			// if the elevator is moving and the current floor is above the destination
-			// floor the travel direction is down
-		} else if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex)
-				.getCurrentFLoor() > elevators.get(elevatorIndex).getDestinationFloor()) {
-			tDirection = 1;
-		}
-
+		for(int i=0;i<occupantAmount.length;i++) {
+			int occupantIndex = binarySearch(occupants, 0, occupants.size() - 1, occupantAmount[i]);
+			int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
+			int roomNumber = occupants.get(occupantIndex).getRoomNumber();
+			String occupantName = occupants.get(occupantIndex).getName();
+			// Assign the Elevator values based on the elevator id
+				int elevatorIndex = linearSearch(elevators, elevatorId);
+				int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
+				int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
+				int lowestFloor = 0;
+				int highestFloor = 10;
+				int capacityLimit = 8;
+				boolean isMoving = elevators.get(elevatorIndex).getIsMoving();
+				int tDirection = 3;
+				// if the elevator is moving and the current floor is below the destination floor the travel direction is up
+				if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex).getCurrentFLoor() < elevators.get(elevatorIndex).getDestinationFloor()) {
+					tDirection = 0;
+					// if the elevator is moving and the current floor is above the destination floor the travel direction is down
+				} else if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex).getCurrentFLoor() > elevators.get(elevatorIndex).getDestinationFloor()) {
+					tDirection = 1;
+				}
 		StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
 
-			int currentFloor;
+			int requestAmount;
 
 			@Override
 			public void onNext(ElevatorResponse response) {
 				System.out.println(response.getElevatorMessage());
-				currentFloor = response.getNextFloor();
+				requestAmount++;
 			}
 
 			@Override
@@ -182,28 +167,34 @@ public class Client {
 
 			@Override
 			public void onCompleted() {
-				System.out.println("Elevator currently at floor: " + currentFloor);
+				System.out.println("Elevator has finished its journey and is currently at floor.");
 			}
 		};
 
 		StreamObserver<ElevatorRequest> requestObserver = asyncStub.moveElevator(responseObserver);
-
-		// set the occupant details
-		try {
-			requestObserver.onNext(ElevatorRequest.newBuilder()
+		
+				try {
+					// set the occupant details
+					requestObserver.onNext(ElevatorRequest.newBuilder()
 					// Set the Occupant details(Id, name, floor, room number)
-					.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName)
-							.setRoomFloor(occupantFloor).setRoomNumber(roomNumber).build())
-
+							.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName).setRoomFloor(occupantFloor)
+							.setRoomNumber(roomNumber).build())
 					// Set the elevator details(Id,currentfloor)
-					.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
-							.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor)
-							.setHighestFloor(highestFloor).setCapacityLimit(capacityLimit).setIsMoving(isMoving)
-							.setTDirectionValue(tDirection))
+							.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
+							.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor).setHighestFloor(highestFloor)
+							.setCapacityLimit(capacityLimit).setIsMoving(isMoving).setTDirectionValue(tDirection))
 					.build());
-		} catch (RuntimeException e) {
-			e.printStackTrace();
+					
+					//Mark the end of requests
+					requestObserver.onCompleted();
+					
+					//sleep for a bit
+					Thread.sleep(1000);
+				}catch(RuntimeException e) {
+					e.printStackTrace();
+				}catch(InterruptedException e) {
+					e.printStackTrace();
+				}
 		}
 	}
-
 }

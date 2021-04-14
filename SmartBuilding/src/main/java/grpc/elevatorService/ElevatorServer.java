@@ -77,8 +77,10 @@ public class ElevatorServer {
 		@Override
 		public StreamObserver<ElevatorRequest> moveElevator(final StreamObserver<ElevatorResponse> responseObserver) {
 			return new StreamObserver<ElevatorRequest>() {
-				int peopleCount; // this will keep track of how many people get into the elevator
-				int currentFloor = 0;
+				int eOnePeopleCount, eTwoPeopleCount, eThreePeopleCount; // this will keep track of how many people get into each elevator
+				int eOneCurrentFloor = 0;
+				int eTwoCurrentFloor = 0;
+				int eThreeCurrentFloor = 0;
 				int destinationFloor;
 				String direction;
 				ArrayList<Integer> eOneDestinationFloors = new ArrayList<>(); // create an arraylist to store the
@@ -91,14 +93,23 @@ public class ElevatorServer {
 				@Override
 				public void onNext(ElevatorRequest value) {
 					int elevatorId = value.getElevator().getId();
+					// if the current floor is the occupants floor they are wanting to go to floor 0
+					if (value.getOccupant().getRoomFloor() == value.getElevator().getCurrentFloor()) {
+						destinationFloor = 0;
+						direction = "down";
+					} else {
+						destinationFloor = value.getOccupant().getRoomFloor();
+					}
 					// If the elevator in use is elevatorId 1
 					if (elevatorId == 1) {
-						peopleCount++; // Increase the people count for every new person to get into the elevator
+						eOnePeopleCount++; // Increase the people count for every new person to get into the elevator
 						// If the elevator has too many people in it (>8)
-						if (peopleCount > value.getElevator().getCapacityLimit()) {
-							System.out.println("Elevator has " + peopleCount
+						if (eOnePeopleCount > value.getElevator().getCapacityLimit()) {
+							System.out.println("Elevator 1 has " + eOnePeopleCount
 									+ " people in it. Maximum capacity the elevator can accept is "
 									+ value.getElevator().getCapacityLimit());
+							// If the amount of people in the elevator is below the capacity limit the
+							// elevator can travel
 						} else {
 							// Set the elevators direction
 							if (value.getElevator().getTDirection() == travelDirection.UP) {
@@ -106,55 +117,102 @@ public class ElevatorServer {
 							} else if (value.getElevator().getTDirection() == travelDirection.DOWN) {
 								direction = "down";
 							}
-							for(int i = 0;i<=peopleCount;i++) {
-								System.out.println("Receiving Elevator Request from occupant id "
+
+							System.out.println("Receiving Elevator Request from occupant id "
 									+ value.getOccupant().getId() + " to go from floor "
 									+ value.getElevator().getCurrentFloor() + " " + direction + " to floor "
-									+ value.getOccupant().getRoomFloor() + " using elevator id " + elevatorId);
-								// Add the destination floor to the floors arrayList if it isn't in the list
-								if (!eOneDestinationFloors.contains(value.getOccupant().getRoomFloor())) {
-									eOneDestinationFloors.add(value.getOccupant().getRoomFloor());
-									System.out.println("Floor " + value.getOccupant().getRoomFloor() + " added to list of floors elevator is travelling to");
-								}
-								//Wait 15 seconds before sending response from the server so more occupants can get in the elevator
-								try {
-									Thread.sleep(15000);
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
+									+ destinationFloor + " using elevator " + elevatorId);
+
+							// Add the destination floor to the floors arrayList if it isn't in the list
+							if (!eOneDestinationFloors.contains(value.getOccupant().getRoomFloor())) {
+								eOneDestinationFloors.add(value.getOccupant().getRoomFloor());
+								System.out.println("Floor " + value.getOccupant().getRoomFloor()
+										+ " added to list of floors elevator 1 is travelling to");
 							}
+
+							// Create response for the amount of people in the elevator
 							ElevatorResponse response = ElevatorResponse.newBuilder()
-									.setElevatorMessage("Elevator 1 going from floor "
-											+ value.getElevator().getCurrentFloor() + " " + direction + " to floor(s) "
-											+ eOneDestinationFloors + ". Next floor: " + eOneDestinationFloors.get(0))
-									.setNextFloor(destinationFloor).setCurrentFloor(currentFloor).build();
-							eOneDestinationFloors.remove(0);
-							currentFloor = destinationFloor;
+									.setElevatorMessage("Received request from occupant id: "
+											+ value.getOccupant().getId() + ". Request: Go from floor "
+											+ value.getElevator().getCurrentFloor() + " " + direction + " to floor "
+											+ destinationFloor + " using elevator " +  value.getElevator().getId())
+									.setNextFloor(eOneDestinationFloors.get(0)).setCurrentFloor(eOneCurrentFloor).build();
 							responseObserver.onNext(response);
 						}
-
 					}
+
+					// If the elevator in use is elevatorId 2
 					if (elevatorId == 2) {
-						if (!eTwoDestinationFloors.contains(destinationFloor)) {
-							eTwoDestinationFloors.add(destinationFloor);
-						}
-						ElevatorResponse response2 = ElevatorResponse.newBuilder()
-								.setElevatorMessage("Elevator 2 going to floor(s) " + eTwoDestinationFloors
-										+ ". Next floor: " + destinationFloor)
-								.setNextFloor(destinationFloor).setCurrentFloor(currentFloor).build();
-						responseObserver.onNext(response2);
-						currentFloor = destinationFloor; // change the currentFloor value to the occupants destination
-															// floor
-						if (elevatorId == 3) {
-							if (!eThreeDestinationFloors.contains(destinationFloor)) {
-								eThreeDestinationFloors.add(destinationFloor);
+						eTwoPeopleCount++; // Increase the people count for every new person to get into the elevator
+						// If the elevator has too many people in it (>8)
+						if (eTwoPeopleCount > value.getElevator().getCapacityLimit()) {
+							System.out.println("Elevator 2 has " + eTwoPeopleCount
+									+ " people in it. Maximum capacity the elevator can accept is "
+									+ value.getElevator().getCapacityLimit());
+							// If the amount of people in the elevator is below the capacity limit the
+							// elevator can travel
+						} else {
+							//Show the elevator request details
+							System.out.println("Receiving Elevator Request from occupant id "
+									+ value.getOccupant().getId() + " to go from floor "
+									+ value.getElevator().getCurrentFloor() + " " + direction + " to floor "
+									+ destinationFloor + " using elevator " + elevatorId);
+
+							// Add the destination floor to the floors arrayList if it isn't in the list
+							if (!eTwoDestinationFloors.contains(value.getOccupant().getRoomFloor())) {
+								eTwoDestinationFloors.add(value.getOccupant().getRoomFloor());
+								System.out.println("Floor " + value.getOccupant().getRoomFloor()
+										+ " added to list of floors elevator 2 is travelling to");
 							}
-							ElevatorResponse response3 = ElevatorResponse.newBuilder()
-									.setElevatorMessage("Elevator 3 going to floor(s) " + eThreeDestinationFloors
-											+ ". Next floor: " + destinationFloor)
-									.setNextFloor(destinationFloor).setCurrentFloor(currentFloor).build();
-							responseObserver.onNext(response3);
+
+							// Create response for the amount of people in the elevator
+							ElevatorResponse response = ElevatorResponse.newBuilder()
+									.setElevatorMessage("Received request from occupant id: "
+											+ value.getOccupant().getId() + ". Request: Go from floor "
+											+ value.getElevator().getCurrentFloor() + " " + direction + " to floor "
+											+ destinationFloor + " using elevator " + value.getElevator().getId())
+									.setNextFloor(eOneDestinationFloors.get(0)).setCurrentFloor(eTwoCurrentFloor).build();
+							responseObserver.onNext(response);
+						}
+					}
+					// If the elevator in use is elevatorId 3
+					if (elevatorId == 3) {
+						eThreePeopleCount++; // Increase the people count for every new person to get into the elevator
+						// If the elevator has too many people in it (>8)
+						if (eThreePeopleCount > value.getElevator().getCapacityLimit()) {
+							System.out.println("Elevator 3 has " + eThreePeopleCount
+									+ " people in it. Maximum capacity the elevator can accept is "
+									+ value.getElevator().getCapacityLimit());
+							// If the amount of people in the elevator is below the capacity limit the
+							// elevator can travel
+						} else {
+							// Set the elevators direction
+							if (value.getElevator().getTDirection() == travelDirection.UP) {
+								direction = "up";
+							} else if (value.getElevator().getTDirection() == travelDirection.DOWN) {
+								direction = "down";
+							}
+
+							System.out.println("Receiving Elevator Request from occupant id "
+									+ value.getOccupant().getId() + " to go from floor "
+									+ value.getElevator().getCurrentFloor() + " " + direction + " to floor "
+									+ destinationFloor + " using elevator " + elevatorId);
+
+							// Add the destination floor to the floors arrayList if it isn't in the list
+							if (!eThreeDestinationFloors.contains(value.getOccupant().getRoomFloor())) {
+								eThreeDestinationFloors.add(value.getOccupant().getRoomFloor());
+								System.out.println("Floor " + value.getOccupant().getRoomFloor()
+										+ " added to list of floors elevator 3 is travelling to");
+							}
+
+							// Create response for the amount of people in the elevator
+							ElevatorResponse response = ElevatorResponse.newBuilder()
+									.setElevatorMessage("Received request from occupant id: "
+											+ value.getOccupant().getId() + ". Request: Go from floor "
+											+ value.getElevator().getCurrentFloor() + " " + direction + " to floor "
+											+ destinationFloor + " using elevator " + value.getElevator().getId())
+									.setNextFloor(eOneDestinationFloors.get(0)).setCurrentFloor(eThreeCurrentFloor).build();
+							responseObserver.onNext(response);
 						}
 					}
 				}
@@ -166,10 +224,47 @@ public class ElevatorServer {
 
 				@Override
 				public void onCompleted() {
-					currentFloor = destinationFloor;
+					int eOneResponseCount = 0;	//elevator one response count
+					int eTwoResponseCount = 0;	//elevator two response count
+					int eThreeResponseCount = 0;	//elevator three response count
+					// Build responses for as many floors as there in the eOneDestinationFloors array list
+					do {
+						int nextFloor = eOneDestinationFloors.get(0);
+						ElevatorResponse response = ElevatorResponse.newBuilder()
+								.setElevatorMessage("Elevator 1 going from floor " + eOneCurrentFloor + " " + direction
+										+ " to floor " + eOneDestinationFloors.remove(0) + ". Next floor(s): "
+										+ eOneDestinationFloors)
+								.setNextFloor(nextFloor).setCurrentFloor(eOneCurrentFloor).build();
+						// assign the currentFLoor to the responses destination floor
+						eOneCurrentFloor = nextFloor;
+						responseObserver.onNext(response);
+					} while (eOneResponseCount < eOneDestinationFloors.size());
+					// Build responses for as many floors as there in the eOneDestinationFloors array list
+					do {
+						int nextFloor = eTwoDestinationFloors.get(0);
+						ElevatorResponse response = ElevatorResponse.newBuilder()
+								.setElevatorMessage("Elevator 2 going from floor " + eTwoCurrentFloor + " " + direction
+										+ " to floor " + eTwoDestinationFloors.remove(0) + ". Next floor(s): "
+										+ eTwoDestinationFloors)
+								.setNextFloor(nextFloor).setCurrentFloor(eTwoCurrentFloor).build();
+						// assign the currentFLoor to the responses destination floor
+						eTwoCurrentFloor = nextFloor;
+						responseObserver.onNext(response);
+					} while (eTwoResponseCount < eTwoDestinationFloors.size());
+					do {
+						int nextFloor = eThreeDestinationFloors.get(0);
+						ElevatorResponse response = ElevatorResponse.newBuilder()
+								.setElevatorMessage("Elevator 3 going from floor " + eThreeCurrentFloor + " " + direction
+										+ " to floor " + eThreeDestinationFloors.remove(0) + ". Next floor(s): "
+										+ eThreeDestinationFloors)
+								.setNextFloor(nextFloor).setCurrentFloor(eThreeCurrentFloor).build();
+						// assign the currentFLoor to the responses destination floor
+						eThreeCurrentFloor = nextFloor;
+						responseObserver.onNext(response);
+					} while (eThreeResponseCount < eThreeDestinationFloors.size());
+					
 					responseObserver.onCompleted();
 				}
-
 			};
 		}
 

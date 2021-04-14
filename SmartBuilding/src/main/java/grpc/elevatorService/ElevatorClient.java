@@ -148,6 +148,8 @@ public class ElevatorClient {
 					// if the elevator is moving and the current floor is above the destination floor the travel direction is down
 				} else if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex).getCurrentFLoor() > elevators.get(elevatorIndex).getDestinationFloor()) {
 					tDirection = 1;
+				}else {
+					tDirection = 3;
 				}
 		StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
 

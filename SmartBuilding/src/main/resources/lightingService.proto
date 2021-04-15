@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "grpc.lightingService";
+option java_outer_classname = "ElevatorServiceImpl";
+
+package lightingService;
+
+//Create the rpc methods
+service lighting{
+	//Unary Streaming RPC
+	rpc adjustLighting(Room) returns (LightingResponse){}
+
+	//Client streaming
+	rpc adjustLightingMultiRoom(stream Room) returns (LightingResponse){}
+}
+
+//Create the messages for the RPC
+message Room{
+	int32 id = 1;
+	string roomName = 2;
+	int32 brightness = 3;
+	int32 blindDrawnAmount = 4;
+	double temperature = 5;
+}
+
+message LightingResponse{
+	int32 brightnessValue = 1;
+	string lightingMessage = 2;
+}

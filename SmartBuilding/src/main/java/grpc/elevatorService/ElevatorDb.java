@@ -1,3 +1,5 @@
+//This class allows elevator instances to be created and their values set/adjusted
+
 package grpc.elevatorService;
 
 public class ElevatorDb {

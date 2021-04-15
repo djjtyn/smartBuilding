@@ -67,12 +67,15 @@ public class ElevatorClient {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// Create Elevator instances (3 elevators)
+		// Create Elevator instances (3 elevators. elevator indexes 0-2)
 		elevators.add(0, new ElevatorDb(1, 0, 0, 0, false));
-		elevators.add(0, new ElevatorDb(2, 0, 0, 0, false));
-		elevators.add(0, new ElevatorDb(3, 0, 0, 0, false));
+		elevators.add(1, new ElevatorDb(2, 0, 0, 0, false));
+		elevators.add(2, new ElevatorDb(3, 0, 0, 0, false));
 
-		moveElevator();
+		//moveElevator();
+
+		returnToGroundFloor();
+
 	}
 
 	// A search method to make sure the correct occupant record is being read to
@@ -208,6 +211,27 @@ public class ElevatorClient {
 		else {
 			System.out.println("Too many people in elevator!!");
 		}
+	}
+	
+	//Method to return the chosen elevator to the ground floor(UNARY RPC)
+	public static void returnToGroundFloor() {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("What elevator number do you want to perform this operation on?");
+		int elevatorId = sc.nextInt();
+		//Get the index of the elevator chosen
+		int elevatorIndex = linearSearch(elevators, elevatorId);
+		//Get the chosen elevators current floor 
+		int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
+
+		//Request
+		Elevator request = Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor).build();
+		
+		//Response
+		ElevatorResponse response = blockingStub.returnToGroundFloor(request);	
+		System.out.println(response.getElevatorMessage());
+		
+		elevators.get(elevatorIndex).setCurrentFloor(0);
+		
 	}
 }
 	

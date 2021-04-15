@@ -3,18 +3,19 @@ package grpc.elevatorService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+/*The imports commented out are not being used currently but may be used for database data at a later time
+//import com.fasterxml.jackson.core.type.TypeReference;
+//import com.fasterxml.jackson.databind.DeserializationFeature;
+//import com.fasterxml.jackson.databind.JsonNode;
+//import com.fasterxml.jackson.databind.ObjectMapper;
+//import com.google.gson.JsonArray;
+//import com.google.gson.JsonObject;
+//import com.google.gson.JsonParser;
+ * 
+ */
 
 import grpc.elevatorService.Elevator.travelDirection;
 import io.grpc.Server;
@@ -74,6 +75,26 @@ public class ElevatorServer {
 	}
 
 	static class ElevatorImpl extends elevatorGrpc.elevatorImplBase {
+
+		@Override
+		public void returnToGroundFloor(Elevator request, StreamObserver<ElevatorResponse> responseObserver) {
+			//If elevator is already on the ground floor
+			if(request.getCurrentFloor() == 0) {
+				System.out.println("Elevator " + request.getId() + " is already on the ground floor");
+				ElevatorResponse response = ElevatorResponse.newBuilder()
+						.setCurrentFloor(request.getCurrentFloor()).setNextFloor(request.getCurrentFloor())
+						.setElevatorMessage("Elevator is already on the ground floor.").build();
+				responseObserver.onNext(response);
+				responseObserver.onCompleted();
+			} else {
+				System.out.println("Elevator " + request.getId() + " is currently on floor " + request.getCurrentFloor() + " and will travel to ground floor");
+				ElevatorResponse response = ElevatorResponse.newBuilder()
+						.setCurrentFloor(request.getCurrentFloor()).setNextFloor(0)
+						.setElevatorMessage("Elevator is travelling from floor " + request.getCurrentFloor() + " to ground floor.").build();
+				responseObserver.onNext(response);
+				responseObserver.onCompleted();
+			}
+		}
 
 		@Override
 		public StreamObserver<ElevatorRequest> moveElevator(final StreamObserver<ElevatorResponse> responseObserver) {
@@ -277,12 +298,6 @@ public class ElevatorServer {
 				}
 			};
 		}
-
-		@Override
-		public void returnToGroundFloor(Elevator request, StreamObserver<ElevatorResponse> responseObserver) {
-
-		}
-
 	}
-
 }
+

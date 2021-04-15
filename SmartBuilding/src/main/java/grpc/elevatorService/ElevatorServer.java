@@ -2,6 +2,7 @@ package grpc.elevatorService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -129,7 +130,7 @@ public class ElevatorServer {
 								System.out.println("Floor " + value.getOccupant().getRoomFloor()
 										+ " added to list of floors elevator 1 is travelling to");
 							}
-
+							
 							// Create response for the amount of people in the elevator
 							ElevatorResponse response = ElevatorResponse.newBuilder()
 									.setElevatorMessage("Received request from occupant id: "
@@ -171,7 +172,7 @@ public class ElevatorServer {
 											+ value.getOccupant().getId() + ". Request: Go from floor "
 											+ value.getElevator().getCurrentFloor() + " " + direction + " to floor "
 											+ destinationFloor + " using elevator " + value.getElevator().getId())
-									.setNextFloor(eOneDestinationFloors.get(0)).setCurrentFloor(eTwoCurrentFloor).build();
+									.setNextFloor(eTwoDestinationFloors.get(0)).setCurrentFloor(eTwoCurrentFloor).build();
 							responseObserver.onNext(response);
 						}
 					}
@@ -211,7 +212,7 @@ public class ElevatorServer {
 											+ value.getOccupant().getId() + ". Request: Go from floor "
 											+ value.getElevator().getCurrentFloor() + " " + direction + " to floor "
 											+ destinationFloor + " using elevator " + value.getElevator().getId())
-									.setNextFloor(eOneDestinationFloors.get(0)).setCurrentFloor(eThreeCurrentFloor).build();
+									.setNextFloor(eThreeDestinationFloors.get(0)).setCurrentFloor(eThreeCurrentFloor).build();
 							responseObserver.onNext(response);
 						}
 					}
@@ -224,44 +225,53 @@ public class ElevatorServer {
 
 				@Override
 				public void onCompleted() {
-					int eOneResponseCount = 0;	//elevator one response count
-					int eTwoResponseCount = 0;	//elevator two response count
-					int eThreeResponseCount = 0;	//elevator three response count
 					// Build responses for as many floors as there in the eOneDestinationFloors array list
-					do {
-						int nextFloor = eOneDestinationFloors.get(0);
-						ElevatorResponse response = ElevatorResponse.newBuilder()
+					if(eOneDestinationFloors.size()>0) {
+						//Sort the arraylist so the elevator stops for each floor as it is travelling up or down
+						Collections.sort(eOneDestinationFloors);
+						do {
+							int nextFloor = eOneDestinationFloors.get(0);
+							ElevatorResponse response = ElevatorResponse.newBuilder()
 								.setElevatorMessage("Elevator 1 going from floor " + eOneCurrentFloor + " " + direction
 										+ " to floor " + eOneDestinationFloors.remove(0) + ". Next floor(s): "
 										+ eOneDestinationFloors)
 								.setNextFloor(nextFloor).setCurrentFloor(eOneCurrentFloor).build();
-						// assign the currentFLoor to the responses destination floor
-						eOneCurrentFloor = nextFloor;
-						responseObserver.onNext(response);
-					} while (eOneResponseCount < eOneDestinationFloors.size());
+							// assign the currentFLoor to the responses destination floor
+							eOneCurrentFloor = nextFloor;
+							responseObserver.onNext(response);
+						} while (!eOneDestinationFloors.isEmpty());
+					}
 					// Build responses for as many floors as there in the eOneDestinationFloors array list
-					do {
-						int nextFloor = eTwoDestinationFloors.get(0);
-						ElevatorResponse response = ElevatorResponse.newBuilder()
-								.setElevatorMessage("Elevator 2 going from floor " + eTwoCurrentFloor + " " + direction
-										+ " to floor " + eTwoDestinationFloors.remove(0) + ". Next floor(s): "
-										+ eTwoDestinationFloors)
-								.setNextFloor(nextFloor).setCurrentFloor(eTwoCurrentFloor).build();
-						// assign the currentFLoor to the responses destination floor
-						eTwoCurrentFloor = nextFloor;
-						responseObserver.onNext(response);
-					} while (eTwoResponseCount < eTwoDestinationFloors.size());
-					do {
-						int nextFloor = eThreeDestinationFloors.get(0);
-						ElevatorResponse response = ElevatorResponse.newBuilder()
-								.setElevatorMessage("Elevator 3 going from floor " + eThreeCurrentFloor + " " + direction
-										+ " to floor " + eThreeDestinationFloors.remove(0) + ". Next floor(s): "
-										+ eThreeDestinationFloors)
-								.setNextFloor(nextFloor).setCurrentFloor(eThreeCurrentFloor).build();
-						// assign the currentFLoor to the responses destination floor
-						eThreeCurrentFloor = nextFloor;
-						responseObserver.onNext(response);
-					} while (eThreeResponseCount < eThreeDestinationFloors.size());
+					if(eTwoDestinationFloors.size()>0) {
+						//Sort the arraylist so the elevator stops for each floor as it is travelling up or down
+						Collections.sort(eTwoDestinationFloors);
+						do {
+							int nextFloor = eTwoDestinationFloors.get(0);
+							ElevatorResponse response = ElevatorResponse.newBuilder()
+									.setElevatorMessage("Elevator 2 going from floor " + eTwoCurrentFloor + " " + direction
+											+ " to floor " + eTwoDestinationFloors.remove(0) + ". Next floor(s): "
+											+ eTwoDestinationFloors)
+									.setNextFloor(nextFloor).setCurrentFloor(eTwoCurrentFloor).build();
+							// assign the currentFLoor to the responses destination floor
+							eTwoCurrentFloor = nextFloor;
+							responseObserver.onNext(response);
+						} while (!eTwoDestinationFloors.isEmpty());
+					}
+					if(eThreeDestinationFloors.size()>0) {
+						//Sort the arraylist so the elevator stops for each floor as it is travelling up or down
+						Collections.sort(eThreeDestinationFloors);
+						do {
+							int nextFloor = eThreeDestinationFloors.get(0);
+							ElevatorResponse response = ElevatorResponse.newBuilder()
+									.setElevatorMessage("Elevator 3 going from floor " + eThreeCurrentFloor + " " + direction
+											+ " to floor " + eThreeDestinationFloors.remove(0) + ". Next floor(s): "
+											+ eThreeDestinationFloors)
+									.setNextFloor(nextFloor).setCurrentFloor(eThreeCurrentFloor).build();
+							// assign the currentFLoor to the responses destination floor
+							eThreeCurrentFloor = nextFloor;
+							responseObserver.onNext(response);
+						} while (!eThreeDestinationFloors.isEmpty());
+					}
 					
 					responseObserver.onCompleted();
 				}

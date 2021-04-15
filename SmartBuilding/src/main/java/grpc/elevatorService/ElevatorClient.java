@@ -113,52 +113,14 @@ public class ElevatorClient {
 
 	// Methods from server
 	public static void moveElevator() {
-		Scanner sc = new Scanner(System.in);
-		System.out.println("What elevator number are you using?");
-		int elevatorId = sc.nextInt();
-		System.out.println("How many people are using the elevator?");
-		int peopleAmount = sc.nextInt();
-		//Create an array of people size
-		int[]occupantAmount = new int[peopleAmount];
-		int occupantId = 0;
-		for(int i=0;i<occupantAmount.length;i++) {
-			System.out.println("Person " + (i+1) + ". What is your occupant id?");
-			occupantId = sc.nextInt();
-			occupantAmount[i] = occupantId;
-		}
-		sc.close();
-		// Assign the Occupant values based on the occupant Id
-		for(int i=0;i<occupantAmount.length;i++) {
-			int occupantIndex = binarySearch(occupants, 0, occupants.size() - 1, occupantAmount[i]);
-			int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
-			int roomNumber = occupants.get(occupantIndex).getRoomNumber();
-			String occupantName = occupants.get(occupantIndex).getName();
-			// Assign the Elevator values based on the elevator id
-				int elevatorIndex = linearSearch(elevators, elevatorId);
-				int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
-				int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
-				int lowestFloor = 0;
-				int highestFloor = 10;
-				int capacityLimit = 8;
-				boolean isMoving = elevators.get(elevatorIndex).getIsMoving();
-				int tDirection = 3;
-				// if the elevator is moving and the current floor is below the destination floor the travel direction is up
-				if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex).getCurrentFLoor() < elevators.get(elevatorIndex).getDestinationFloor()) {
-					tDirection = 0;
-					// if the elevator is moving and the current floor is above the destination floor the travel direction is down
-				} else if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex).getCurrentFLoor() > elevators.get(elevatorIndex).getDestinationFloor()) {
-					tDirection = 1;
-				}else {
-					tDirection = 3;
-				}
+		
 		StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
-
-			int requestAmount;
-
+			
+			int currentFloor;
 			@Override
 			public void onNext(ElevatorResponse response) {
 				System.out.println(response.getElevatorMessage());
-				requestAmount++;
+				currentFloor = response.getNextFloor();
 			}
 
 			@Override
@@ -169,34 +131,84 @@ public class ElevatorClient {
 
 			@Override
 			public void onCompleted() {
-				System.out.println("Elevator has finished its journey and is currently at floor.");
+				System.out.println("Elevator has finished its journey and is currently on floor " + currentFloor);
 			}
 		};
-
+		
 		StreamObserver<ElevatorRequest> requestObserver = asyncStub.moveElevator(responseObserver);
 		
-				try {
-					// set the occupant details
-					requestObserver.onNext(ElevatorRequest.newBuilder()
-					// Set the Occupant details(Id, name, floor, room number)
-							.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName).setRoomFloor(occupantFloor)
-							.setRoomNumber(roomNumber).build())
-					// Set the elevator details(Id,currentfloor)
-							.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
-							.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor).setHighestFloor(highestFloor)
-							.setCapacityLimit(capacityLimit).setIsMoving(isMoving).setTDirectionValue(tDirection))
-					.build());
-					
-					//Mark the end of requests
-					requestObserver.onCompleted();
-					
-					//sleep for a bit
-					Thread.sleep(1000);
-				}catch(RuntimeException e) {
-					e.printStackTrace();
-				}catch(InterruptedException e) {
-					e.printStackTrace();
-				}
+		Scanner sc = new Scanner(System.in);
+		System.out.println("What elevator number are you using?");
+		int elevatorId = sc.nextInt();
+		System.out.println("How many people are using the elevator?");
+		int peopleAmount = sc.nextInt();
+		int requestAmount = 0;
+		if(peopleAmount <= 8) {
+			int[]occupantAmount;
+			//Create an array of people size
+			occupantAmount = new int[peopleAmount];
+			int occupantId = 0;
+			for(int i=0;i<occupantAmount.length;i++) {
+				System.out.println("Person " + (i+1) + ". What is your occupant id?");
+				occupantId = sc.nextInt();
+				occupantAmount[i] = occupantId;
+			}
+			sc.close();
+			// Assign the Occupant values based on the occupant Id
+			for(int i=0;i<occupantAmount.length;i++) {
+					int occupantIndex = binarySearch(occupants, 0, occupants.size() - 1, occupantAmount[i]);
+					//Reassign the occupant id for each occupant in the elevator
+					occupantId = occupants.get(occupantIndex).getId();
+					int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
+					int roomNumber = occupants.get(occupantIndex).getRoomNumber();
+					String occupantName = occupants.get(occupantIndex).getName();
+					// Assign the Elevator values based on the elevator id
+					int elevatorIndex = linearSearch(elevators, elevatorId);
+					int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
+					int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
+					int lowestFloor = 0;
+					int highestFloor = 10;					
+					int capacityLimit = 8;
+					boolean isMoving = elevators.get(elevatorIndex).getIsMoving();
+					int tDirection = 3;
+					// if the elevator is moving and the current floor is below the destination floor the travel direction is up
+					if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex).getCurrentFLoor() < elevators.get(elevatorIndex).getDestinationFloor()) {
+						tDirection = 0;
+						// if the elevator is moving and the current floor is above the destination floor the travel direction is down
+					} else if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex).getCurrentFLoor() > elevators.get(elevatorIndex).getDestinationFloor()) {
+						tDirection = 1;
+					}else {
+						tDirection = 3;
+					}
+					requestAmount++;
+					try {
+						requestObserver.onNext(ElevatorRequest.newBuilder()
+							// Set the Occupant details(Id, name, floor, room number)
+									.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName).setRoomFloor(occupantFloor)
+									.setRoomNumber(roomNumber).build())
+							// Set the elevator details(Id,currentfloor)
+									.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
+									.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor).setHighestFloor(highestFloor)
+									.setCapacityLimit(capacityLimit).setIsMoving(isMoving).setTDirectionValue(tDirection))
+							.build());
+						//if the amount of requests is the same as the amount of occupants the client stream is finished
+						if(requestAmount == occupantAmount.length) {
+							requestObserver.onCompleted();
+						}
+							//Mark the end of requests
+							//sleep for a bit
+						Thread.sleep(1000);
+					}catch(RuntimeException e) {
+						e.printStackTrace();
+					}catch(InterruptedException e) {
+						e.printStackTrace();
+					}
+			}
+		}
+		else {
+			System.out.println("Too many people in elevator!!");
 		}
 	}
 }
+	
+

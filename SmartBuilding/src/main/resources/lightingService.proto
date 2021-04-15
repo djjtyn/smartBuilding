@@ -22,6 +22,8 @@ message Room{
 	int32 brightness = 3;
 	int32 blindDrawnAmount = 4;
 	double temperature = 5;
+	int32 intAdjust = 6;
+	double doubleAdjust = 7;
 }
 
 message LightingResponse{

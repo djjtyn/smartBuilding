@@ -64,8 +64,42 @@ public class LightingServer {
 
 			@Override
 			public void adjustLighting(Room request, StreamObserver<LightingResponse> responseObserver) {
-				// TODO Auto-generated method stub
-				super.adjustLighting(request, responseObserver);
+				//If the lights are trying to be adjusted above 100%
+				if(request.getIntAdjust() >= 100) {
+					System.out.println("Maximum the brighthness can be adjusted to is 100%. You have attempted to adjust it to " + request.getIntAdjust() + "%");
+					System.out.println("Resorting to 100% lighting");
+					LightingResponse response = LightingResponse.newBuilder().setBrightnessValue(100).setLightingMessage("Maximum the brighthness can be adjusted to is 100%."
+							+ " You have attempted to adjust it to " + request.getIntAdjust() +"%. Resorting to 100% lighting. Room: " + request.getRoomName() 
+					+ " lighting adjusted from " + request.getBrightness() + "% to 100%").build();
+					responseObserver.onNext(response);
+					responseObserver.onCompleted();
+				}
+				//If the lights are trying to be adjusted below 0%
+				else if(request.getIntAdjust()<0) {
+					System.out.println("Minimum the brightness can be adjusted to is 0%. You have attempted to adjust it to " + request.getIntAdjust() + "%");
+					System.out.println("Resorting to 0% (Lights powered off");
+					LightingResponse response = LightingResponse.newBuilder().setBrightnessValue(0).setLightingMessage("Minimum the brightness can be adjusted to is 0%. "
+							+ "You have attempted to adjust it to " + request.getIntAdjust() + "%. Resorting to 0% lighting(Lights powered off). Room: " + request.getRoomName() 
+					+ " lighting adjusted from " + request.getBrightness() + "% to 0%").build();
+					responseObserver.onNext(response);
+					responseObserver.onCompleted();
+				}
+				//If the lights are already at the desired setting
+				else if(request.getIntAdjust() == request.getBrightness()) {
+					System.out.println("The lights are already set at your desired setting: " + request.getIntAdjust() + "%");
+					LightingResponse response = LightingResponse.newBuilder().setLightingMessage("The lights are already set at your desired setting- " + request.getIntAdjust() + "%. Room: " + 
+					request.getRoomName() + " lighting remaining at " + request.getBrightness() + "%").build();
+					responseObserver.onNext(response);
+					responseObserver.onCompleted();		
+				}//If its a valid request
+				else {
+					System.out.println("Receiving request to change the brightness of room: " + request.getRoomName() + " from " + 
+							request.getBrightness() + "% to %" +  request.getIntAdjust());		
+					LightingResponse response = LightingResponse.newBuilder().setBrightnessValue(request.getIntAdjust()).setLightingMessage("Room: " + request.getRoomName() 
+					+ " lighting adjusted from " + request.getBrightness() + "% to " + request.getIntAdjust() + "%").build();
+					responseObserver.onNext(response);
+					responseObserver.onCompleted();	
+				}	
 			}
 
 			@Override

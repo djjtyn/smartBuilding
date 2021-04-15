@@ -25,6 +25,8 @@ private static final long serialVersionUID = 0L;
     brightness_ = 0;
     blindDrawnAmount_ = 0;
     temperature_ = 0D;
+    intAdjust_ = 0;
+    doubleAdjust_ = 0D;
   }
 
   @java.lang.Override
@@ -75,6 +77,16 @@ private static final long serialVersionUID = 0L;
           case 41: {
 
             temperature_ = input.readDouble();
+            break;
+          }
+          case 48: {
+
+            intAdjust_ = input.readInt32();
+            break;
+          }
+          case 57: {
+
+            doubleAdjust_ = input.readDouble();
             break;
           }
           default: {
@@ -179,6 +191,24 @@ private static final long serialVersionUID = 0L;
     return temperature_;
   }
 
+  public static final int INTADJUST_FIELD_NUMBER = 6;
+  private int intAdjust_;
+  /**
+   * <code>int32 intAdjust = 6;</code>
+   */
+  public int getIntAdjust() {
+    return intAdjust_;
+  }
+
+  public static final int DOUBLEADJUST_FIELD_NUMBER = 7;
+  private double doubleAdjust_;
+  /**
+   * <code>double doubleAdjust = 7;</code>
+   */
+  public double getDoubleAdjust() {
+    return doubleAdjust_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -208,6 +238,12 @@ private static final long serialVersionUID = 0L;
     if (temperature_ != 0D) {
       output.writeDouble(5, temperature_);
     }
+    if (intAdjust_ != 0) {
+      output.writeInt32(6, intAdjust_);
+    }
+    if (doubleAdjust_ != 0D) {
+      output.writeDouble(7, doubleAdjust_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -235,6 +271,14 @@ private static final long serialVersionUID = 0L;
     if (temperature_ != 0D) {
       size += com.google.protobuf.CodedOutputStream
         .computeDoubleSize(5, temperature_);
+    }
+    if (intAdjust_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(6, intAdjust_);
+    }
+    if (doubleAdjust_ != 0D) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeDoubleSize(7, doubleAdjust_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -264,6 +308,12 @@ private static final long serialVersionUID = 0L;
         java.lang.Double.doubleToLongBits(getTemperature())
         == java.lang.Double.doubleToLongBits(
             other.getTemperature()));
+    result = result && (getIntAdjust()
+        == other.getIntAdjust());
+    result = result && (
+        java.lang.Double.doubleToLongBits(getDoubleAdjust())
+        == java.lang.Double.doubleToLongBits(
+            other.getDoubleAdjust()));
     result = result && unknownFields.equals(other.unknownFields);
     return result;
   }
@@ -286,6 +336,11 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + TEMPERATURE_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         java.lang.Double.doubleToLongBits(getTemperature()));
+    hash = (37 * hash) + INTADJUST_FIELD_NUMBER;
+    hash = (53 * hash) + getIntAdjust();
+    hash = (37 * hash) + DOUBLEADJUST_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        java.lang.Double.doubleToLongBits(getDoubleAdjust()));
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -433,6 +488,10 @@ private static final long serialVersionUID = 0L;
 
       temperature_ = 0D;
 
+      intAdjust_ = 0;
+
+      doubleAdjust_ = 0D;
+
       return this;
     }
 
@@ -464,6 +523,8 @@ private static final long serialVersionUID = 0L;
       result.brightness_ = brightness_;
       result.blindDrawnAmount_ = blindDrawnAmount_;
       result.temperature_ = temperature_;
+      result.intAdjust_ = intAdjust_;
+      result.doubleAdjust_ = doubleAdjust_;
       onBuilt();
       return result;
     }
@@ -527,6 +588,12 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getTemperature() != 0D) {
         setTemperature(other.getTemperature());
+      }
+      if (other.getIntAdjust() != 0) {
+        setIntAdjust(other.getIntAdjust());
+      }
+      if (other.getDoubleAdjust() != 0D) {
+        setDoubleAdjust(other.getDoubleAdjust());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -726,6 +793,58 @@ private static final long serialVersionUID = 0L;
     public Builder clearTemperature() {
       
       temperature_ = 0D;
+      onChanged();
+      return this;
+    }
+
+    private int intAdjust_ ;
+    /**
+     * <code>int32 intAdjust = 6;</code>
+     */
+    public int getIntAdjust() {
+      return intAdjust_;
+    }
+    /**
+     * <code>int32 intAdjust = 6;</code>
+     */
+    public Builder setIntAdjust(int value) {
+      
+      intAdjust_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 intAdjust = 6;</code>
+     */
+    public Builder clearIntAdjust() {
+      
+      intAdjust_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private double doubleAdjust_ ;
+    /**
+     * <code>double doubleAdjust = 7;</code>
+     */
+    public double getDoubleAdjust() {
+      return doubleAdjust_;
+    }
+    /**
+     * <code>double doubleAdjust = 7;</code>
+     */
+    public Builder setDoubleAdjust(double value) {
+      
+      doubleAdjust_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>double doubleAdjust = 7;</code>
+     */
+    public Builder clearDoubleAdjust() {
+      
+      doubleAdjust_ = 0D;
       onChanged();
       return this;
     }

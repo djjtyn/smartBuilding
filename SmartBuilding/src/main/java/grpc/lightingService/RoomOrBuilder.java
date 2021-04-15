@@ -36,4 +36,14 @@ public interface RoomOrBuilder extends
    * <code>double temperature = 5;</code>
    */
   double getTemperature();
+
+  /**
+   * <code>int32 intAdjust = 6;</code>
+   */
+  int getIntAdjust();
+
+  /**
+   * <code>double doubleAdjust = 7;</code>
+   */
+  double getDoubleAdjust();
 }

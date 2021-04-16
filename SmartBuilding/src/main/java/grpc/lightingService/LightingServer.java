@@ -94,7 +94,7 @@ public class LightingServer {
 				}//If its a valid request
 				else {
 					System.out.println("Receiving request to change the brightness of room: " + request.getRoomName() + " from " + 
-							request.getBrightness() + "% to %" +  request.getIntAdjust());		
+							request.getBrightness() + "% to " +  request.getIntAdjust() + "%");		
 					LightingResponse response = LightingResponse.newBuilder().setBrightnessValue(request.getIntAdjust()).setLightingMessage("Room: " + request.getRoomName() 
 					+ " lighting adjusted from " + request.getBrightness() + "% to " + request.getIntAdjust() + "%").build();
 					responseObserver.onNext(response);
@@ -104,8 +104,41 @@ public class LightingServer {
 
 			@Override
 			public StreamObserver<Room> adjustLightingMultiRoom(StreamObserver<LightingResponse> responseObserver) {
-				// TODO Auto-generated method stub
-				return super.adjustLightingMultiRoom(responseObserver);
+				
+				return new StreamObserver<Room>() {
+					//Create array list to store room names and their desired lighting settings 
+					ArrayList<RoomDb> rooms = new ArrayList<>();
+					@Override
+					public void onNext(Room value) {
+						System.out.println("Receiving request for room: " + value.getRoomName() + " to adjust its brightness from " + value.getBrightness() + "% to " +
+						value.getIntAdjust() + "%");
+						//Add the room name and its adjusted brightness level to  to array list
+						rooms.add(new RoomDb(value.getRoomName(), value.getIntAdjust()));
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						
+					}
+
+					@Override
+					public void onCompleted() {
+						System.out.println("Received requests for all rooms selected");
+						//Create a String builder so all the room names and their new brightness value can be seen 
+						StringBuilder sb = new StringBuilder();
+						//Traverse all the rooms in the room array list
+						for(int i=0;i<rooms.size();i++) {
+							sb.append("Room: " + rooms.get(i).getRoomName() + " brightness adjusted to " + rooms.get(i).getBrightness() + "%. ");
+						}
+						//convert the string builder to a string and use it as the responses message
+						String responseString = sb.toString();
+						LightingResponse response = LightingResponse.newBuilder().setLightingMessage(responseString).build();
+						
+						responseObserver.onNext(response);
+						responseObserver.onCompleted();
+					}
+					
+				};
 			}
 			
 		}

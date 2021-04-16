@@ -10,13 +10,19 @@ public class RoomDb {
 	private int blindDrawnAmount;
 	private double temperature;
 	
-	//OVERLOAD CONSTRUCTOR
+	//OVERLOAD CONSTRUCTOR TO SET EVERYTHING
 	public RoomDb(int id, String roomName, int brightness, int blindDrawnAmount, double temperature) {
 		this.id = id;
 		this.roomName = roomName;
 		this.brightness = brightness;
 		this.blindDrawnAmount = blindDrawnAmount;
 		this.temperature = temperature; 
+	}
+	
+	//OVERLOAD CONSTRUCTOR TO SET ROOM NAME AND BRIGHTNESS
+	public RoomDb(String roomName, int brightness) {
+		this.roomName = roomName;
+		this.brightness = brightness;
 	}
 	
 	

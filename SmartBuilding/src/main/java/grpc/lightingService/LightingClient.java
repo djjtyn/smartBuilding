@@ -35,7 +35,8 @@ public class LightingClient {
 		asyncStub = lightingGrpc.newStub(channel);
 		
 		//Call the server methods
-		adjustLighting();
+		//adjustLighting();
+		adjustLightingMultiRoom();
 	}
 	
 	// A search method to make sure the correct room record is being read to retrieve their info with
@@ -83,12 +84,66 @@ public class LightingClient {
 		//Set the rooms instance brightness value
 		rooms.get(roomIndex).setBrightness(response.getBrightnessValue());
 		
-		System.out.println(response.getLightingMessage());
-		
-		
-		
+		System.out.println(response.getLightingMessage());		
 	}
 	
+	public static void adjustLightingMultiRoom() {
+		StreamObserver<LightingResponse> responseObserver = new StreamObserver<LightingResponse>() {
 
-}
+			@Override
+			public void onNext(LightingResponse value) {
+				System.out.println("Can I reach here?");
+				System.out.println(value.getLightingMessage());
+				
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				
+			}
+
+			@Override
+			public void onCompleted() {
+				System.out.println("Finished adjusting lighting");
+				
+			}
+			
+		};
+		
+		StreamObserver<Room> requestObserver = asyncStub.adjustLightingMultiRoom(responseObserver);
+		//create requestCount to count requests being sent
+		int roomId = 0;
+		Scanner sc = new Scanner(System.in);
+		System.out.println("How many rooms are you adjusting the lighting for?");
+		int roomAmount = sc.nextInt();
+		//Create an array using the roomAmount
+		int[] selectedRooms = new int[roomAmount];
+		int requestAmount = 1;
+		//Fill the selectedRooms with room id's
+		while(requestAmount <= roomAmount) {
+			int i =0;
+			//Get the room id's of all the rooms the user wants to adjust the brightness for
+			System.out.println("What is the id of room " + requestAmount + ":");
+			roomId = sc.nextInt();
+			selectedRooms[i] = roomId;
+			int roomIndex = binarySearch(rooms, 0, rooms.size() - 1, selectedRooms[i]);
+			//Reassign the room id for each selected room
+			roomId = rooms.get(roomIndex).getId();
+			int currentBrightness = rooms.get(roomIndex).getBrightness();
+			String roomName = rooms.get(roomIndex).getRoomName();
+			System.out.println("What percentage do you want to set the brightness for Room: " + roomName);
+			int desiredBrightness = sc.nextInt();
+			requestAmount++;
+			//Create a try/catch block to set the request details using the info gathered from the for loop
+			try {
+				requestObserver.onNext(Room.newBuilder().setBrightness(currentBrightness).setId(roomId).setRoomName(roomName).setIntAdjust(desiredBrightness).build());
+				//REQUEST OBSERVER NOT WORKING YET!!!
+			}catch(RuntimeException e) {
+				e.printStackTrace();
+			}
+		}
+		requestObserver.onCompleted();
+		}
+	}
+
 

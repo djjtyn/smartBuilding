@@ -1,3 +1,4 @@
+
 package grpc.elevatorService;
 
 import java.io.File;
@@ -107,7 +108,7 @@ public class ElevatorClient {
 	// Methods from server
 	public static void moveElevator() {
 		
-		StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
+StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
 			
 			int currentFloor;
 			@Override
@@ -203,7 +204,10 @@ public class ElevatorClient {
 			System.out.println("Too many people in elevator!!");
 		}
 	}
+
 	
+
+			
 	//Method to return the chosen elevator to the ground floor(UNARY RPC)
 	public static void returnToGroundFloor() {
 		Scanner sc = new Scanner(System.in);

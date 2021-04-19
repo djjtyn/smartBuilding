@@ -1,0 +1,27 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "grpc.occupantService";
+option java_outer_classname = "occupantServiceImpl";
+
+package occupantService;
+
+service occupantService{
+	rpc viewGymTrainers(Empty) returns (stream GymTrainer){}
+}
+
+message Empty{
+
+}
+
+message GymTrainer{
+	int32 id = 1;
+	string name = 2;
+	string speciality = 3;
+	bool availableNow = 4;
+	Time nextAvailableTime = 5;
+}
+
+message Time{
+	int32 hour = 1;
+	int32 minute = 2;
+}

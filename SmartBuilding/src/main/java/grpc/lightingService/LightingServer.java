@@ -4,7 +4,6 @@ package grpc.lightingService;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import io.grpc.Server;
@@ -123,7 +122,7 @@ public class LightingServer {
 
 					@Override
 					public void onCompleted() {
-						System.out.println("Received requests for all rooms selected");
+						//System.out.println("Received requests for all rooms selected");
 						//Create a String builder so all the room names and their new brightness value can be seen 
 						StringBuilder sb = new StringBuilder();
 						//Traverse all the rooms in the room array list
@@ -132,9 +131,10 @@ public class LightingServer {
 						}
 						//convert the string builder to a string and use it as the responses message
 						String responseString = sb.toString();
-						LightingResponse response = LightingResponse.newBuilder().setLightingMessage(responseString).build();
-						
-						responseObserver.onNext(response);
+						System.out.println(responseString);
+						LightingResponse.Builder response = LightingResponse.newBuilder();
+						response.setLightingMessage(responseString);
+						responseObserver.onNext(response.build());
 						responseObserver.onCompleted();
 					}
 					

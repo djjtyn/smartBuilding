@@ -110,13 +110,13 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return grpc.lightingService.ElevatorServiceImpl.internal_static_lightingService_Room_descriptor;
+    return grpc.lightingService.LightingServiceImpl.internal_static_lightingService_Room_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return grpc.lightingService.ElevatorServiceImpl.internal_static_lightingService_Room_fieldAccessorTable
+    return grpc.lightingService.LightingServiceImpl.internal_static_lightingService_Room_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             grpc.lightingService.Room.class, grpc.lightingService.Room.Builder.class);
   }
@@ -449,13 +449,13 @@ private static final long serialVersionUID = 0L;
       grpc.lightingService.RoomOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return grpc.lightingService.ElevatorServiceImpl.internal_static_lightingService_Room_descriptor;
+      return grpc.lightingService.LightingServiceImpl.internal_static_lightingService_Room_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return grpc.lightingService.ElevatorServiceImpl.internal_static_lightingService_Room_fieldAccessorTable
+      return grpc.lightingService.LightingServiceImpl.internal_static_lightingService_Room_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               grpc.lightingService.Room.class, grpc.lightingService.Room.Builder.class);
     }
@@ -498,7 +498,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return grpc.lightingService.ElevatorServiceImpl.internal_static_lightingService_Room_descriptor;
+      return grpc.lightingService.LightingServiceImpl.internal_static_lightingService_Room_descriptor;
     }
 
     @java.lang.Override

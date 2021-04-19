@@ -3,8 +3,8 @@
 
 package grpc.lightingService;
 
-public final class ElevatorServiceImpl {
-  private ElevatorServiceImpl() {}
+public final class LightingServiceImpl {
+  private LightingServiceImpl() {}
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistryLite registry) {
   }
@@ -44,7 +44,7 @@ public final class ElevatorServiceImpl {
       "ngService.LightingResponse\"\000\022W\n\027adjustLi" +
       "ghtingMultiRoom\022\025.lightingService.Room\032!" +
       ".lightingService.LightingResponse\"\000(\001B-\n" +
-      "\024grpc.lightingServiceB\023ElevatorServiceIm" +
+      "\024grpc.lightingServiceB\023LightingServiceIm" +
       "plP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =

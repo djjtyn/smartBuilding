@@ -322,7 +322,7 @@ public final class lightingGrpc {
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
-      return grpc.lightingService.ElevatorServiceImpl.getDescriptor();
+      return grpc.lightingService.LightingServiceImpl.getDescriptor();
     }
 
     @java.lang.Override

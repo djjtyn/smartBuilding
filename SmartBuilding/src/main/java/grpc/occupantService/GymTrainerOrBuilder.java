@@ -33,20 +33,40 @@ public interface GymTrainerOrBuilder extends
       getSpecialityBytes();
 
   /**
-   * <code>bool availableNow = 4;</code>
+   * <code>string phoneNumber = 4;</code>
+   */
+  java.lang.String getPhoneNumber();
+  /**
+   * <code>string phoneNumber = 4;</code>
+   */
+  com.google.protobuf.ByteString
+      getPhoneNumberBytes();
+
+  /**
+   * <code>string email = 5;</code>
+   */
+  java.lang.String getEmail();
+  /**
+   * <code>string email = 5;</code>
+   */
+  com.google.protobuf.ByteString
+      getEmailBytes();
+
+  /**
+   * <code>bool availableNow = 6;</code>
    */
   boolean getAvailableNow();
 
   /**
-   * <code>.occupantService.Time nextAvailableTime = 5;</code>
+   * <code>.occupantService.Time nextAvailableTime = 7;</code>
    */
   boolean hasNextAvailableTime();
   /**
-   * <code>.occupantService.Time nextAvailableTime = 5;</code>
+   * <code>.occupantService.Time nextAvailableTime = 7;</code>
    */
   grpc.occupantService.Time getNextAvailableTime();
   /**
-   * <code>.occupantService.Time nextAvailableTime = 5;</code>
+   * <code>.occupantService.Time nextAvailableTime = 7;</code>
    */
   grpc.occupantService.TimeOrBuilder getNextAvailableTimeOrBuilder();
 }

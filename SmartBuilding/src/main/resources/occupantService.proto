@@ -17,8 +17,10 @@ message GymTrainer{
 	int32 id = 1;
 	string name = 2;
 	string speciality = 3;
-	bool availableNow = 4;
-	Time nextAvailableTime = 5;
+	string phoneNumber = 4;
+	string email = 5;
+	bool availableNow = 6;
+	Time nextAvailableTime = 7;
 }
 
 message Time{

@@ -19,6 +19,8 @@ private static final long serialVersionUID = 0L;
     id_ = 0;
     name_ = "";
     speciality_ = "";
+    phoneNumber_ = "";
+    email_ = "";
     availableNow_ = false;
   }
 
@@ -63,12 +65,24 @@ private static final long serialVersionUID = 0L;
             speciality_ = s;
             break;
           }
-          case 32: {
+          case 34: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            phoneNumber_ = s;
+            break;
+          }
+          case 42: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            email_ = s;
+            break;
+          }
+          case 48: {
 
             availableNow_ = input.readBool();
             break;
           }
-          case 42: {
+          case 58: {
             grpc.occupantService.Time.Builder subBuilder = null;
             if (nextAvailableTime_ != null) {
               subBuilder = nextAvailableTime_.toBuilder();
@@ -190,31 +204,99 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int AVAILABLENOW_FIELD_NUMBER = 4;
+  public static final int PHONENUMBER_FIELD_NUMBER = 4;
+  private volatile java.lang.Object phoneNumber_;
+  /**
+   * <code>string phoneNumber = 4;</code>
+   */
+  public java.lang.String getPhoneNumber() {
+    java.lang.Object ref = phoneNumber_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      phoneNumber_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string phoneNumber = 4;</code>
+   */
+  public com.google.protobuf.ByteString
+      getPhoneNumberBytes() {
+    java.lang.Object ref = phoneNumber_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      phoneNumber_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int EMAIL_FIELD_NUMBER = 5;
+  private volatile java.lang.Object email_;
+  /**
+   * <code>string email = 5;</code>
+   */
+  public java.lang.String getEmail() {
+    java.lang.Object ref = email_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      email_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string email = 5;</code>
+   */
+  public com.google.protobuf.ByteString
+      getEmailBytes() {
+    java.lang.Object ref = email_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      email_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int AVAILABLENOW_FIELD_NUMBER = 6;
   private boolean availableNow_;
   /**
-   * <code>bool availableNow = 4;</code>
+   * <code>bool availableNow = 6;</code>
    */
   public boolean getAvailableNow() {
     return availableNow_;
   }
 
-  public static final int NEXTAVAILABLETIME_FIELD_NUMBER = 5;
+  public static final int NEXTAVAILABLETIME_FIELD_NUMBER = 7;
   private grpc.occupantService.Time nextAvailableTime_;
   /**
-   * <code>.occupantService.Time nextAvailableTime = 5;</code>
+   * <code>.occupantService.Time nextAvailableTime = 7;</code>
    */
   public boolean hasNextAvailableTime() {
     return nextAvailableTime_ != null;
   }
   /**
-   * <code>.occupantService.Time nextAvailableTime = 5;</code>
+   * <code>.occupantService.Time nextAvailableTime = 7;</code>
    */
   public grpc.occupantService.Time getNextAvailableTime() {
     return nextAvailableTime_ == null ? grpc.occupantService.Time.getDefaultInstance() : nextAvailableTime_;
   }
   /**
-   * <code>.occupantService.Time nextAvailableTime = 5;</code>
+   * <code>.occupantService.Time nextAvailableTime = 7;</code>
    */
   public grpc.occupantService.TimeOrBuilder getNextAvailableTimeOrBuilder() {
     return getNextAvailableTime();
@@ -243,11 +325,17 @@ private static final long serialVersionUID = 0L;
     if (!getSpecialityBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, speciality_);
     }
+    if (!getPhoneNumberBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, phoneNumber_);
+    }
+    if (!getEmailBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 5, email_);
+    }
     if (availableNow_ != false) {
-      output.writeBool(4, availableNow_);
+      output.writeBool(6, availableNow_);
     }
     if (nextAvailableTime_ != null) {
-      output.writeMessage(5, getNextAvailableTime());
+      output.writeMessage(7, getNextAvailableTime());
     }
     unknownFields.writeTo(output);
   }
@@ -268,13 +356,19 @@ private static final long serialVersionUID = 0L;
     if (!getSpecialityBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, speciality_);
     }
+    if (!getPhoneNumberBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, phoneNumber_);
+    }
+    if (!getEmailBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, email_);
+    }
     if (availableNow_ != false) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(4, availableNow_);
+        .computeBoolSize(6, availableNow_);
     }
     if (nextAvailableTime_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(5, getNextAvailableTime());
+        .computeMessageSize(7, getNextAvailableTime());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -298,6 +392,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getName());
     result = result && getSpeciality()
         .equals(other.getSpeciality());
+    result = result && getPhoneNumber()
+        .equals(other.getPhoneNumber());
+    result = result && getEmail()
+        .equals(other.getEmail());
     result = result && (getAvailableNow()
         == other.getAvailableNow());
     result = result && (hasNextAvailableTime() == other.hasNextAvailableTime());
@@ -322,6 +420,10 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getName().hashCode();
     hash = (37 * hash) + SPECIALITY_FIELD_NUMBER;
     hash = (53 * hash) + getSpeciality().hashCode();
+    hash = (37 * hash) + PHONENUMBER_FIELD_NUMBER;
+    hash = (53 * hash) + getPhoneNumber().hashCode();
+    hash = (37 * hash) + EMAIL_FIELD_NUMBER;
+    hash = (53 * hash) + getEmail().hashCode();
     hash = (37 * hash) + AVAILABLENOW_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getAvailableNow());
@@ -468,6 +570,10 @@ private static final long serialVersionUID = 0L;
 
       speciality_ = "";
 
+      phoneNumber_ = "";
+
+      email_ = "";
+
       availableNow_ = false;
 
       if (nextAvailableTimeBuilder_ == null) {
@@ -505,6 +611,8 @@ private static final long serialVersionUID = 0L;
       result.id_ = id_;
       result.name_ = name_;
       result.speciality_ = speciality_;
+      result.phoneNumber_ = phoneNumber_;
+      result.email_ = email_;
       result.availableNow_ = availableNow_;
       if (nextAvailableTimeBuilder_ == null) {
         result.nextAvailableTime_ = nextAvailableTime_;
@@ -568,6 +676,14 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getSpeciality().isEmpty()) {
         speciality_ = other.speciality_;
+        onChanged();
+      }
+      if (!other.getPhoneNumber().isEmpty()) {
+        phoneNumber_ = other.phoneNumber_;
+        onChanged();
+      }
+      if (!other.getEmail().isEmpty()) {
+        email_ = other.email_;
         onChanged();
       }
       if (other.getAvailableNow() != false) {
@@ -769,15 +885,153 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private java.lang.Object phoneNumber_ = "";
+    /**
+     * <code>string phoneNumber = 4;</code>
+     */
+    public java.lang.String getPhoneNumber() {
+      java.lang.Object ref = phoneNumber_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        phoneNumber_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string phoneNumber = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPhoneNumberBytes() {
+      java.lang.Object ref = phoneNumber_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        phoneNumber_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string phoneNumber = 4;</code>
+     */
+    public Builder setPhoneNumber(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      phoneNumber_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string phoneNumber = 4;</code>
+     */
+    public Builder clearPhoneNumber() {
+      
+      phoneNumber_ = getDefaultInstance().getPhoneNumber();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string phoneNumber = 4;</code>
+     */
+    public Builder setPhoneNumberBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      phoneNumber_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object email_ = "";
+    /**
+     * <code>string email = 5;</code>
+     */
+    public java.lang.String getEmail() {
+      java.lang.Object ref = email_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        email_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string email = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getEmailBytes() {
+      java.lang.Object ref = email_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        email_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string email = 5;</code>
+     */
+    public Builder setEmail(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      email_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string email = 5;</code>
+     */
+    public Builder clearEmail() {
+      
+      email_ = getDefaultInstance().getEmail();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string email = 5;</code>
+     */
+    public Builder setEmailBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      email_ = value;
+      onChanged();
+      return this;
+    }
+
     private boolean availableNow_ ;
     /**
-     * <code>bool availableNow = 4;</code>
+     * <code>bool availableNow = 6;</code>
      */
     public boolean getAvailableNow() {
       return availableNow_;
     }
     /**
-     * <code>bool availableNow = 4;</code>
+     * <code>bool availableNow = 6;</code>
      */
     public Builder setAvailableNow(boolean value) {
       
@@ -786,7 +1040,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>bool availableNow = 4;</code>
+     * <code>bool availableNow = 6;</code>
      */
     public Builder clearAvailableNow() {
       
@@ -799,13 +1053,13 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         grpc.occupantService.Time, grpc.occupantService.Time.Builder, grpc.occupantService.TimeOrBuilder> nextAvailableTimeBuilder_;
     /**
-     * <code>.occupantService.Time nextAvailableTime = 5;</code>
+     * <code>.occupantService.Time nextAvailableTime = 7;</code>
      */
     public boolean hasNextAvailableTime() {
       return nextAvailableTimeBuilder_ != null || nextAvailableTime_ != null;
     }
     /**
-     * <code>.occupantService.Time nextAvailableTime = 5;</code>
+     * <code>.occupantService.Time nextAvailableTime = 7;</code>
      */
     public grpc.occupantService.Time getNextAvailableTime() {
       if (nextAvailableTimeBuilder_ == null) {
@@ -815,7 +1069,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.occupantService.Time nextAvailableTime = 5;</code>
+     * <code>.occupantService.Time nextAvailableTime = 7;</code>
      */
     public Builder setNextAvailableTime(grpc.occupantService.Time value) {
       if (nextAvailableTimeBuilder_ == null) {
@@ -831,7 +1085,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.occupantService.Time nextAvailableTime = 5;</code>
+     * <code>.occupantService.Time nextAvailableTime = 7;</code>
      */
     public Builder setNextAvailableTime(
         grpc.occupantService.Time.Builder builderForValue) {
@@ -845,7 +1099,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.occupantService.Time nextAvailableTime = 5;</code>
+     * <code>.occupantService.Time nextAvailableTime = 7;</code>
      */
     public Builder mergeNextAvailableTime(grpc.occupantService.Time value) {
       if (nextAvailableTimeBuilder_ == null) {
@@ -863,7 +1117,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.occupantService.Time nextAvailableTime = 5;</code>
+     * <code>.occupantService.Time nextAvailableTime = 7;</code>
      */
     public Builder clearNextAvailableTime() {
       if (nextAvailableTimeBuilder_ == null) {
@@ -877,7 +1131,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.occupantService.Time nextAvailableTime = 5;</code>
+     * <code>.occupantService.Time nextAvailableTime = 7;</code>
      */
     public grpc.occupantService.Time.Builder getNextAvailableTimeBuilder() {
       
@@ -885,7 +1139,7 @@ private static final long serialVersionUID = 0L;
       return getNextAvailableTimeFieldBuilder().getBuilder();
     }
     /**
-     * <code>.occupantService.Time nextAvailableTime = 5;</code>
+     * <code>.occupantService.Time nextAvailableTime = 7;</code>
      */
     public grpc.occupantService.TimeOrBuilder getNextAvailableTimeOrBuilder() {
       if (nextAvailableTimeBuilder_ != null) {
@@ -896,7 +1150,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.occupantService.Time nextAvailableTime = 5;</code>
+     * <code>.occupantService.Time nextAvailableTime = 7;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         grpc.occupantService.Time, grpc.occupantService.Time.Builder, grpc.occupantService.TimeOrBuilder> 

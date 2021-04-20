@@ -7,14 +7,18 @@ public class TrainerDb {
 	private int id;
 	private String trainerName;
 	private String trainerSpeciality;
+	private String phoneNumber;
+	private String emailAddress;
 	boolean availableNow;
 	Time nextAvailableTime;
 	
 	public TrainerDb() {}
-	public TrainerDb(int id, String name, String speciality, boolean available) {
+	public TrainerDb(int id, String name, String speciality, String phoneNumber, String emailAddress, boolean available) {
 		this.id = id;
 		this.trainerName = name;
 		this.trainerSpeciality = speciality;
+		this.phoneNumber = phoneNumber;
+		this.emailAddress = emailAddress;
 		this.availableNow = available;
 	}
 	
@@ -45,6 +49,22 @@ public class TrainerDb {
 
 	public void setTrainerSpeciality(String trainerSpeciality) {
 		this.trainerSpeciality = trainerSpeciality;
+	}
+	
+	public String getPhoneNumber() {
+		return this.phoneNumber;
+	}
+	
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+	
+	public String getEmailAddress() {
+		return this.emailAddress;
+	}
+	
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress;
 	}
 
 

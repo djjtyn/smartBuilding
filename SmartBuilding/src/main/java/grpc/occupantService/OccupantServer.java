@@ -53,18 +53,18 @@ public class OccupantServer {
 				}
 			});
 			// Create Trainer instances
-			trainers.add(0, new TrainerDb(1, "Jeddy Roycraft", "legs", true));	
-			trainers.add(0, new TrainerDb(2, "Christan Galpen", "legs", true));
-			trainers.add(0, new TrainerDb(3, "Mirella Tuite", "arms", true));
-			trainers.add(0, new TrainerDb(4, "Brander Abels", "arms", true));
-			trainers.add(0, new TrainerDb(5, "Geoffry Howford", "chest", true));
-			trainers.add(0, new TrainerDb(6, "Libby Postance", "chest", true));
-			trainers.add(0, new TrainerDb(7, "Hedi Templar", "shoulders", true));
-			trainers.add(0, new TrainerDb(8, "Merrel McAtamney", "shoulders", true));
-			trainers.add(0, new TrainerDb(9, "Hubert Ledgard", "back", true));
-			trainers.add(0, new TrainerDb(10, "Rozelle Coley", "back", true));
-			trainers.add(0, new TrainerDb(11, "Asa Wornham", "core", true));
-			trainers.add(0, new TrainerDb(12, "Rafe Ivison", "core", true));
+			trainers.add(0, new TrainerDb(1, "Jeddy Roycraft", "legs", "351-249-6784","JeddyRoycraft@theGym.ie" ,true));	
+			trainers.add(0, new TrainerDb(2, "Christan Galpen", "legs", "527-601-2945","ChristanGalpen@theGym.ie", true));
+			trainers.add(0, new TrainerDb(3, "Mirella Tuite", "arms","831-313-2896","MirellaTuite@theGym.ie", true));
+			trainers.add(0, new TrainerDb(4, "Brander Abels", "arms", "455-776-8738","BranderAbelst@theGym.ie",true));
+			trainers.add(0, new TrainerDb(5, "Geoffry Howford", "chest","707-617-7422","GeoffryHowford@theGym.ie" ,true));
+			trainers.add(0, new TrainerDb(6, "Libby Postance", "chest","828-202-0601","LibbyPostance@theGym.ie", true));
+			trainers.add(0, new TrainerDb(7, "Hedi Templar", "shoulders","277-543-4931","HediTemplar@theGym.ie", true));
+			trainers.add(0, new TrainerDb(8, "Merrel McAtamney", "shoulders","489-655-9332","MerrelMcAtamney@theGym.ie", true));
+			trainers.add(0, new TrainerDb(9, "Hubert Ledgard", "back","749-210-8912","HubertLedgard@theGym.ie", true));
+			trainers.add(0, new TrainerDb(10, "Rozelle Coley", "back","393-136-9775","RozelleColeyt@theGym.ie", true));
+			trainers.add(0, new TrainerDb(11, "Asa Wornham", "core", "913-736-3924","AsaWornham@theGym.ie",true));
+			trainers.add(0, new TrainerDb(12, "Rafe Ivison", "core","432-442-9402","RafeIvison@theGym.ie", true));
 		}
 
 		// STOP serving requests
@@ -89,8 +89,10 @@ public class OccupantServer {
 				
 				//Traverse the TrainerDb
 				for(int i=0;i<trainers.size();i++) {
-					GymTrainer response = GymTrainer.newBuilder().setId(trainers.get(i).getId()).setName(trainers.get(i).getTrainerName())
-											.setSpeciality(trainers.get(i).getTrainerSpeciality()).setAvailableNow(trainers.get(i).isAvailableNow()).build();
+					GymTrainer response = GymTrainer.newBuilder()
+											.setId(trainers.get(i).getId()).setName(trainers.get(i).getTrainerName())
+											.setSpeciality(trainers.get(i).getTrainerSpeciality()).setPhoneNumber(trainers.get(i).getPhoneNumber())
+											.setEmail(trainers.get(i).getEmailAddress()).setAvailableNow(trainers.get(i).isAvailableNow()).build();
 					responseObserver.onNext(response);
 					try {
 						//wait for a second

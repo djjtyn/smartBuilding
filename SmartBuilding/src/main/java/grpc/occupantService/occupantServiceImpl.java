@@ -39,15 +39,16 @@ public final class occupantServiceImpl {
   static {
     java.lang.String[] descriptorData = {
       "\n\025occupantService.proto\022\017occupantService" +
-      "\"\007\n\005Empty\"\202\001\n\nGymTrainer\022\n\n\002id\030\001 \001(\005\022\014\n\004" +
-      "name\030\002 \001(\t\022\022\n\nspeciality\030\003 \001(\t\022\024\n\014availa" +
-      "bleNow\030\004 \001(\010\0220\n\021nextAvailableTime\030\005 \001(\0132" +
-      "\025.occupantService.Time\"$\n\004Time\022\014\n\004hour\030\001" +
-      " \001(\005\022\016\n\006minute\030\002 \001(\0052]\n\017occupantService\022" +
-      "J\n\017viewGymTrainers\022\026.occupantService.Emp" +
-      "ty\032\033.occupantService.GymTrainer\"\0000\001B-\n\024g" +
-      "rpc.occupantServiceB\023occupantServiceImpl" +
-      "P\001b\006proto3"
+      "\"\007\n\005Empty\"\246\001\n\nGymTrainer\022\n\n\002id\030\001 \001(\005\022\014\n\004" +
+      "name\030\002 \001(\t\022\022\n\nspeciality\030\003 \001(\t\022\023\n\013phoneN" +
+      "umber\030\004 \001(\t\022\r\n\005email\030\005 \001(\t\022\024\n\014availableN" +
+      "ow\030\006 \001(\010\0220\n\021nextAvailableTime\030\007 \001(\0132\025.oc" +
+      "cupantService.Time\"$\n\004Time\022\014\n\004hour\030\001 \001(\005" +
+      "\022\016\n\006minute\030\002 \001(\0052]\n\017occupantService\022J\n\017v" +
+      "iewGymTrainers\022\026.occupantService.Empty\032\033" +
+      ".occupantService.GymTrainer\"\0000\001B-\n\024grpc." +
+      "occupantServiceB\023occupantServiceImplP\001b\006" +
+      "proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -72,7 +73,7 @@ public final class occupantServiceImpl {
     internal_static_occupantService_GymTrainer_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_occupantService_GymTrainer_descriptor,
-        new java.lang.String[] { "Id", "Name", "Speciality", "AvailableNow", "NextAvailableTime", });
+        new java.lang.String[] { "Id", "Name", "Speciality", "PhoneNumber", "Email", "AvailableNow", "NextAvailableTime", });
     internal_static_occupantService_Time_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_occupantService_Time_fieldAccessorTable = new

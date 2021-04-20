@@ -42,7 +42,7 @@ public class ElevatorClient {
 		asyncStub = elevatorGrpc.newStub(channel);
 		// Get the occupant data from the occupantData CSV file and create Occupant records with it
 		String dir = System.getProperty("user.dir");	//Get the users current directory to be used with file location below
-		Scanner sc = new Scanner(new File(dir + "/src/main/resources/occupantData.csv"));
+		Scanner sc = new Scanner(new File(dir + "/src/main/resources/elevatorService/occupantData.csv"));
 		// create the arraylist that will be used for storing the database info
 		String dbHeadings = sc.nextLine(); // this is just so the data headings aren't read
 		try {

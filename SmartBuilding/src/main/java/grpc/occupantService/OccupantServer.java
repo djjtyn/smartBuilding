@@ -63,7 +63,7 @@ public class OccupantServer extends occupantServiceImplBase {
 			ServiceInfo serviceInfo = ServiceInfo.create(service_type, service_name, service_port,
 					service_description_properties);
 			jmdns.registerService(serviceInfo);
-			System.out.printf("registrering service with type %s and name %s \n", service_type, service_name);
+			System.out.printf("Registering service with type %s and name %s \n", service_type, service_name);
 
 			// Wait a bit
 			Thread.sleep(1000);

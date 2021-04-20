@@ -40,9 +40,9 @@ public class ElevatorClient {
 		//initialise the stubs 
 		blockingStub = elevatorGrpc.newBlockingStub(channel);
 		asyncStub = elevatorGrpc.newStub(channel);
-		// Get the occupant data from the occupantData CSV file and create Occupant
-		// records with it
-		Scanner sc = new Scanner(new File("src/main/resources/occupantData.csv"));
+		// Get the occupant data from the occupantData CSV file and create Occupant records with it
+		String dir = System.getProperty("user.dir");	//Get the users current directory to be used with file location below
+		Scanner sc = new Scanner(new File(dir + "/src/main/resources/occupantData.csv"));
 		// create the arraylist that will be used for storing the database info
 		String dbHeadings = sc.nextLine(); // this is just so the data headings aren't read
 		try {
@@ -64,9 +64,9 @@ public class ElevatorClient {
 		elevators.add(1, new ElevatorDb(2, 0, 0, 0, false));
 		elevators.add(2, new ElevatorDb(3, 0, 0, 0, false));
 
-		//moveElevator();
+		moveElevator();
 
-		returnToGroundFloor();
+		//returnToGroundFloor();
 
 	}
 

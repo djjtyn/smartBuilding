@@ -4,11 +4,7 @@ package grpc.occupantService;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import grpc.elevatorService.elevatorGrpc.elevatorBlockingStub;
-import grpc.elevatorService.elevatorGrpc.elevatorStub;
 import grpc.lightingService.LightingClient;
-import grpc.lightingService.RoomDb;
-import grpc.lightingService.lightingGrpc;
 import grpc.occupantService.occupantServiceGrpc.occupantServiceBlockingStub;
 import grpc.occupantService.occupantServiceGrpc.occupantServiceStub;
 import io.grpc.ManagedChannel;

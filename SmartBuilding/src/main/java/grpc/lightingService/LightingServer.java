@@ -110,7 +110,7 @@ public class LightingServer extends lightingImplBase {
 	@Override
 	public void adjustLighting(Room request, StreamObserver<LightingResponse> responseObserver) {
 		// If the lights are trying to be adjusted above 100%
-		if (request.getIntAdjust() >= 100) {
+		if (request.getIntAdjust() > 100) {
 			System.out.println("Maximum the brighthness can be adjusted to is 100%. You have attempted to adjust it to "
 					+ request.getIntAdjust() + "%");
 			System.out.println("Resorting to 100% lighting");

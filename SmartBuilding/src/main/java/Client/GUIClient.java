@@ -156,23 +156,23 @@ public class GUIClient {
 					Iterator<GymTrainer> responseIterator = occupantBlockingStub.viewGymTrainers(request);
 					int iterateCount = 1;
 					while(responseIterator.hasNext()) {
-						System.out.println("***Gym Trainer " + iterateCount + "***");
 						GymTrainer response = responseIterator.next();
+						textResponse.append("***Gym Trainer " + iterateCount + "***\n" + response.toString() + "\n");
 						System.out.println(response);
 						iterateCount++;
 					}		
 			}
 		});
 		panel_service_1.add(gymTrainerBtn);
-//		
-//		textResponse = new JTextArea(3, 20);
-//		textResponse .setLineWrap(true);
-//		textResponse.setWrapStyleWord(true);
-//		
-//		JScrollPane scrollPane = new JScrollPane(textResponse);
-//		
-//		//textResponse.setSize(new Dimension(15, 30));
-//		panel_service_1.add(scrollPane);
+		
+		textResponse = new JTextArea(20, 20);
+		textResponse .setLineWrap(true);
+		textResponse.setWrapStyleWord(true);
+		
+		JScrollPane scrollPane = new JScrollPane(textResponse);
+		
+		//textResponse.setSize(new Dimension(15, 30));
+		panel_service_1.add(scrollPane);
 
 	}
 }

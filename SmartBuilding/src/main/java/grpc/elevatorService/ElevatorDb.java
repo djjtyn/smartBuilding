@@ -11,7 +11,7 @@ public class ElevatorDb {
 	private final int LOWESTFLOOR = 0;
 	private final int HIGHESTFLOOR = 10;
 	private final int CAPACITYLIMIT = 8;
-	private int currentCapacity;
+	private int currentCapacity = 0;
 	boolean isMoving;
 	enum travelDirection{
 		UP, DOWN

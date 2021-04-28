@@ -12,6 +12,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 //import OccupantService requirements
 import grpc.occupantService.Empty;
@@ -52,6 +56,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import org.omg.CORBA.Request;
+
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -80,6 +86,9 @@ public class GUIClient {
 	private JFrame frame = new JFrame();
 	private JTextField textInput, multiLightTextInput;
 	private JTextArea serverResponse, singleLightResponse, multiLightResponse;
+	
+	//This will count the amount of streams in streaming methods
+	int streamCounter = 0;
 
 	public static void main(String[] args) throws FileNotFoundException {
 		String dir = System.getProperty("user.dir"); // Get the users current directory to be used with file location
@@ -127,14 +136,15 @@ public class GUIClient {
 
 		// Build the channels
 		// (1)Occupant Service Channel
-		String occupantService = "_occupantService._tcp.local.";
-		discoverService(occupantService);
-		int occupantPort = 50053;
+//		String occupantService = "_occupantService._tcp.local.";
 		String host = "localhost";
-		ManagedChannel occupantChannel = ManagedChannelBuilder.forAddress(host, occupantPort).usePlaintext().build();
-		occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
-		occupantAsyncStub = occupantServiceGrpc.newStub(occupantChannel);
-
+//		discoverService(occupantService);
+//		int occupantPort = 50053;
+//		String host = "localhost";
+//		ManagedChannel occupantChannel = ManagedChannelBuilder.forAddress(host, occupantPort).usePlaintext().build();
+//		occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
+//		occupantAsyncStub = occupantServiceGrpc.newStub(occupantChannel);
+//
 		// (2)Lighting Service Channel
 		String lightingService = "_lightingService._tcp.local.";
 		discoverService(lightingService);
@@ -264,10 +274,8 @@ public class GUIClient {
 		JButton singleLightAdjust = new JButton("Adjust Lighting");
 		panel.add(singleLightAdjust);
 		JButton serviceSelection = new JButton("Back to Service Selection");
-		;
 		panel.add(serviceSelection);
 		JButton lightingSelection = new JButton("Back to Light adjustment options");
-		;
 		panel.add(lightingSelection);
 		singleLightAdjust.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -309,8 +317,45 @@ public class GUIClient {
 		return panel;
 	}
 
-	// This is for the lighting service for a multiple rooms
-	private JPanel getMultiLightControl() {
+	// This is for choosing how many rooms the multi lighting will be used for
+	private JPanel selectRoomAmount() {
+		JPanel panel = new JPanel();
+		frame.getContentPane().add(panel);
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		JLabel roomAmountSelection = new JLabel("How many rooms do you want to adjust the lighting for? ");
+		panel.add(roomAmountSelection);
+		// Create a JCOmbo box to diplay how many rooms there are using the room id's
+		JComboBox<Integer> roomList = new JComboBox<Integer>();
+		for (RoomDb room : rooms) {
+			roomList.addItem(room.getId());
+		}
+		panel.add(roomList);
+		JButton selectRoomAmount = new JButton("Select Amount");
+		panel.add(selectRoomAmount);
+		selectRoomAmount.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int roomAmount = roomList.getSelectedIndex() + 1;	//This will be used as the argument for the multi lighting method 
+				frame.setContentPane(getMultiLightControl(roomAmount));
+				// Visibility Setting below is so the JFrame can load the selected options panel
+				frame.setVisible(false);
+				frame.setVisible(true);
+			}
+		});
+		JButton serviceSelection = new JButton("Back to Service Selection");
+		panel.add(serviceSelection);
+		serviceSelection.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(initialiseStartPanel());
+				// Visibility Setting below is so the JFrame can load the selected options panel
+				frame.setVisible(false);
+				frame.setVisible(true);
+			}
+		});
+		return panel;
+	}
+
+	// This is for setting the lighting service for a multiple rooms
+	private JPanel getMultiLightControl(int roomAmount) {
 		JPanel panel = new JPanel();
 		JComboBox<String> roomList = new JComboBox<String>();
 		for (RoomDb room : rooms) {
@@ -327,26 +372,54 @@ public class GUIClient {
 		JButton multiLightAdjust = new JButton("Adjust Lighting");
 		panel.add(multiLightAdjust);
 		JButton serviceSelection = new JButton("Back to Service Selection");
-		;
 		panel.add(serviceSelection);
 		JButton lightingSelection = new JButton("Back to Light adjustment options");
-		;
 		panel.add(lightingSelection);
-		multiLightAdjust.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+				StreamObserver<LightingResponse> responseObserver = new StreamObserver<LightingResponse>() {
+					
+					@Override
+					public void onNext(LightingResponse value) {
+						System.out.println(value.getLightingMessage());
+						
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						t.printStackTrace();
+					}
+
+					@Override
+					public void onCompleted() {
+						System.out.println("Light Control Stream is completed!! Amount of light adjustments made: " + streamCounter);
+						//Reset the stream counter
+						streamCounter = 0;
+						
+					}
+					
+				};
 				// Request
-				int roomIndex = roomList.getSelectedIndex();
-				int lightAdjustment = Integer.parseInt(textInput.getText());
-				Room lightRequest = Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
-						.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build();
-				// Response
-				LightingResponse lightResponse = lightingBlockingStub.adjustLighting(lightRequest);
-				System.out.println(lightResponse.getLightingMessage());
-				singleLightResponse.append(lightResponse.getLightingMessage());
-				// Set the rooms instance brightness value after the change is made
-				rooms.get(roomIndex).setBrightness(lightResponse.getBrightnessValue());
-			}
-		});
+				 StreamObserver<Room> requestObserver = lightingAsyncStub.adjustLightingMultiRoom(responseObserver);
+					multiLightAdjust.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							//Increase the count of streams
+							if(streamCounter<=roomAmount) {
+								System.out.println("StreamCounter: " + streamCounter);
+								int roomIndex = roomList.getSelectedIndex();
+								int lightAdjustment = Integer.parseInt(multiLightTextInput.getText());
+								requestObserver.onNext(Room.newBuilder()
+										.setBrightness(rooms.get(roomIndex).getBrightness())
+										.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build());
+								//set the instances value
+								rooms.get(roomIndex).setBrightness(lightAdjustment);
+								streamCounter++;
+								System.out.println("Stream Count: " + streamCounter);
+								//If the stream amount gets the the roomAmount call oncompleted()
+							if(streamCounter >= roomAmount) {
+									requestObserver.onCompleted();
+								}
+							}
+						}
+					});
 		serviceSelection.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				frame.setContentPane(initialiseStartPanel());
@@ -393,7 +466,7 @@ public class GUIClient {
 		panel.add(multiRoom);
 		multiRoom.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				frame.setContentPane(getMultiLightControl());
+				frame.setContentPane(selectRoomAmount());
 				// Visibility Setting below is so the JFrame can load the selected options panel
 				frame.setVisible(false);
 				frame.setVisible(true);
@@ -448,7 +521,8 @@ public class GUIClient {
 		elevatorRequest1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
-
+					// the countdown latch will deal with when to call request.onComplete()
+					final CountDownLatch finishLatch = new CountDownLatch(1);
 					int currentFloor;
 
 					@Override
@@ -467,8 +541,7 @@ public class GUIClient {
 
 					@Override
 					public void onCompleted() {
-						System.out
-								.println("Elevator 1 has finished its journey and is currently on floor " + currentFloor);
+						finishLatch.countDown();
 					}
 				};
 				StreamObserver<ElevatorRequest> requestObserver = elevatorAsyncStub.moveElevator(responseObserver);
@@ -484,25 +557,21 @@ public class GUIClient {
 				int elevatorId = 1;
 				int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
 				int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
+				// Sets the travel direction
+				int travelDirection;
+				if (currentFloor < occupantFloor) {
+					travelDirection = 0;
+				} else if (currentFloor > occupantFloor) {
+					travelDirection = 1;
+				} else {
+					travelDirection = 2;
+				}
 				int amountOfPeople = elevators.get(elevatorIndex).getCurrentCapacity();
 				int lowestFloor = 0;
 				int highestFloor = 10;
 				int capacityLimit = elevators.get(elevatorIndex).getCapacityLimit();
 				boolean isMoving = elevators.get(elevatorIndex).getIsMoving();
-				int tDirection = 3;
-				// if the elevator is moving and the current floor is below the destination
-				// floor the travel direction is up
-				if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex)
-						.getCurrentFLoor() < elevators.get(elevatorIndex).getDestinationFloor()) {
-					tDirection = 0;
-					// if the elevator is moving and the current floor is above the destination
-					// floor the travel direction is down
-				} else if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex)
-						.getCurrentFLoor() > elevators.get(elevatorIndex).getDestinationFloor()) {
-					tDirection = 1;
-				} else {
-					tDirection = 3;
-				}
+
 				// Request
 				requestObserver.onNext(ElevatorRequest.newBuilder()
 						// Set the Occupant details(Id, name, floor, room number)
@@ -512,10 +581,21 @@ public class GUIClient {
 						.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
 								.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor)
 								.setHighestFloor(highestFloor).setCurrentCapacity(++amountOfPeople)
-								.setCapacityLimit(capacityLimit).setIsMoving(isMoving).setTDirectionValue(tDirection))
+								.setCapacityLimit(capacityLimit).setIsMoving(isMoving)
+								.setTDirectionValue(travelDirection))
 						.build());
 				elevators.get(elevatorIndex).setCurrentCapactity(amountOfPeople);
+				Timer t = new Timer();
+				t.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						requestObserver.onCompleted();
+						t.cancel();
+					}
+				}, 10000);
+
 			}
+
 		});
 
 		// Requests for elevator 2
@@ -541,8 +621,8 @@ public class GUIClient {
 
 					@Override
 					public void onCompleted() {
-						System.out
-								.println("Elevator 2 has finished its journey and is currently on floor " + currentFloor);
+						System.out.println(
+								"Elevator 2 has finished its journey and is currently on floor " + currentFloor);
 					}
 				};
 				StreamObserver<ElevatorRequest> requestObserver = elevatorAsyncStub.moveElevator(responseObserver);
@@ -613,8 +693,8 @@ public class GUIClient {
 
 					@Override
 					public void onCompleted() {
-						System.out
-								.println("Elevator 3 has finished its journey and is currently on floor " + currentFloor);
+						System.out.println(
+								"Elevator 3 has finished its journey and is currently on floor " + currentFloor);
 					}
 				};
 				StreamObserver<ElevatorRequest> requestObserver = elevatorAsyncStub.moveElevator(responseObserver);

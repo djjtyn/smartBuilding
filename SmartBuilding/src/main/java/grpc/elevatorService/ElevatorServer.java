@@ -174,10 +174,11 @@ public class ElevatorServer extends elevatorImplBase {
 						if (!eOneDestinationFloors.contains(value.getOccupant().getRoomFloor())) {
 							eOneDestinationFloors.add(value.getOccupant().getRoomFloor());
 						}
+						System.out.println("Floor requests: " + eOneDestinationFloors);
 						ElevatorResponse response = ElevatorResponse.newBuilder()
 								.setElevatorMessage("Received request from occupant id: " + value.getOccupant().getId()
 										+ ". Request: Go from floor " + value.getElevator().getCurrentFloor() + " "
-										+ direction + " to floor " + destinationFloor + " using elevator "
+										+ value.getElevator().getTDirection() + " to floor " + destinationFloor + " using elevator "
 										+ value.getElevator().getId() + ". Floor Requests " + eOneDestinationFloors)
 								.setNextFloor(eOneDestinationFloors.get(0)).setCurrentFloor(eOneCurrentFloor).build();
 						responseObserver.onNext(response);
@@ -190,7 +191,6 @@ public class ElevatorServer extends elevatorImplBase {
 						responseObserver.onNext(response);
 					}
 				}
-
 				// If the elevator in use is elevatorId 2
 				if (elevatorId == 2) {
 					if (value.getElevator().getCurrentCapacity() <= value.getElevator().getCapacityLimit()) {
@@ -244,6 +244,7 @@ public class ElevatorServer extends elevatorImplBase {
 						}
 					}
 				}
+			
 
 			@Override
 			public void onError(Throwable t) {
@@ -252,8 +253,6 @@ public class ElevatorServer extends elevatorImplBase {
 
 			@Override
 			public void onCompleted() {
-				// Build responses for as many floors as there in the eOneDestinationFloors
-				// array list
 				if (eOneDestinationFloors.size() > 0) {
 					// Sort the arraylist so the elevator stops for each floor as it is travelling
 					// up or down
@@ -270,6 +269,7 @@ public class ElevatorServer extends elevatorImplBase {
 						responseObserver.onNext(response);
 					} while (!eOneDestinationFloors.isEmpty());
 				}
+				responseObserver.onNext(null);;
 				// Build responses for as many floors as there in the eOneDestinationFloors
 				// array list
 				if (eTwoDestinationFloors.size() > 0) {

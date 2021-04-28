@@ -166,6 +166,7 @@ public class LightingServer extends lightingImplBase {
 		return new StreamObserver<Room>() {
 			// Create array list to store room names and their desired lighting settings
 			ArrayList<RoomDb> rooms = new ArrayList<>();
+			
 
 			@Override
 			public void onNext(Room value) {

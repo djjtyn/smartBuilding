@@ -511,10 +511,6 @@ public class GUIClient {
 		JButton elevatorRequest3 = new JButton("Request elevator 3");
 		elevatorRequest3.setBounds(281, 219, 150, 23);
 		panel.add(elevatorRequest3);
-		JLabel lblNewLabel = new JLabel("Testers");
-		lblNewLabel.setBounds(207, 223, 46, 14);
-		panel.add(lblNewLabel);
-
 		JButton serviceSelection = new JButton("Back to Service Selection");
 		serviceSelection.setBounds(260, 266, 150, 23);
 		panel.add(serviceSelection);
@@ -530,16 +526,12 @@ public class GUIClient {
 
 		// Requests for elevator 1
 				StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
-					// the countdown latch will deal with when to call request.onComplete()
-					final CountDownLatch finishLatch = new CountDownLatch(1);
 					int currentFloor;
 
 					@Override
 					public void onNext(ElevatorResponse response) {
-						
 						serverResponse.append(response.getElevatorMessage() + "\n");
 						currentFloor = response.getNextFloor();
-
 					}
 
 					@Override
@@ -550,7 +542,9 @@ public class GUIClient {
 
 					@Override
 					public void onCompleted() {
-						finishLatch.countDown();
+						//Set the elevator floors instance
+						elevators.get(0).setCurrentFloor(currentFloor);
+						System.out.println("Elevator has finished its journey. Elevator currently on floor " + currentFloor);
 					}
 				};
 				// Request
@@ -560,10 +554,9 @@ public class GUIClient {
 				      public void actionPerformed(ActionEvent evt) {
 				    	timerCount++;
 				    	if(timerCount >=8) {
+				    		swingTimer.stop();
 				    		requestObserver.onCompleted();
 				    	}
-				        System.out.println(timerCount);
-						//lblNewLabel.setText(String.valueOf(timerCount));
 				      }
 				    }; 
 				    swingTimer = new Timer(1000, taskPerformer);

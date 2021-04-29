@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 
-
 //import OccupantService requirements
 import grpc.occupantService.Empty;
 import grpc.occupantService.GymTrainer;
@@ -70,25 +69,24 @@ public class GUIClient {
 	private static lightingStub lightingAsyncStub;
 	// Create elevator stubs(Only Async Stub needed)
 	private static elevatorStub elevatorAsyncStub;
-	
-	
-	//Elements needed for the JFrame GUI
+
+	// Elements needed for the JFrame GUI
 	private JFrame frame = new JFrame();
 	private JTextField textInput;
 	private JTextArea serverResponse;
-	
-	ServiceInfo serviceInfo;
-	
-	//This will count the amount of streams passed in streaming methods
-	int streamCounter = 0;
-	
-	//This will be used to create a timer and keep track of its value
-	Timer swingTimer;
-	int timerCount = 0; 
 
+	ServiceInfo serviceInfo;
+
+	// This will count the amount of streams passed in streaming methods
+	int streamCounter = 0;
+
+	// This will be used to create a timer and keep track of its value
+	Timer swingTimer;
+	int timerCount = 0;
 
 	public static void main(String[] args) throws FileNotFoundException {
-		String dir = System.getProperty("user.dir"); // Get the users current directory to be used with file location below
+		String dir = System.getProperty("user.dir"); // Get the users current directory to be used with file location
+														// below
 		Scanner sc = new Scanner(new File(dir + "/src/main/resources/elevatorService/occupantData.csv"));
 		// Initialise the array list that will be used for storing the database info
 		String dbHeadings = sc.nextLine(); // this is just so the data headings aren't read
@@ -106,11 +104,9 @@ public class GUIClient {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		// Create Elevator instances (3 elevators)
+
+		// Create an elevator instance
 		elevators.add(0, new ElevatorDb(1, 0, 0, 0, false));
-		elevators.add(1, new ElevatorDb(2, 0, 0, 0, false));
-		elevators.add(2, new ElevatorDb(3, 0, 0, 0, false));
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -137,11 +133,11 @@ public class GUIClient {
 		// (1)Occupant Service Channel
 		String occupantService = " _http._tcp.local_occupantService.";
 		discoverService(occupantService);
-		//int occupantPort = serviceInfo.getPort();
-		//System.out.println("Occupant port: " + occupantPort);
-		//ManagedChannel occupantChannel = ManagedChannelBuilder.forAddress(host, occupantPort).usePlaintext().build();
-		//occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
-
+		// int occupantPort = serviceInfo.getPort();
+		// System.out.println("Occupant port: " + occupantPort);
+		// ManagedChannel occupantChannel = ManagedChannelBuilder.forAddress(host,
+		// occupantPort).usePlaintext().build();
+		// occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
 
 		// (2)Lighting Service Channel
 //		String lightingService = "_lightingService._tcp.local.";
@@ -179,9 +175,9 @@ public class GUIClient {
 					System.out.println("This is never called");
 					System.out.println("Service resolved: " + event.getInfo());
 
-					//serviceInfo = event.getInfo();
+					// serviceInfo = event.getInfo();
 
-					//int port = serviceInfo.getPort();
+					// int port = serviceInfo.getPort();
 
 //					System.out.println("resolving " + service + " with properties ...");
 //					System.out.println("\t port: " + port);
@@ -336,7 +332,8 @@ public class GUIClient {
 		panel.add(selectRoomAmount);
 		selectRoomAmount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				int roomAmount = roomList.getSelectedIndex() + 1;	//This will be used as the argument for the multi lighting method 
+				int roomAmount = roomList.getSelectedIndex() + 1; // This will be used as the argument for the multi
+																	// lighting method
 				frame.setContentPane(getMultiLightControl(roomAmount));
 				// Visibility Setting below is so the JFrame can load the selected options panel
 				frame.setVisible(false);
@@ -377,50 +374,51 @@ public class GUIClient {
 		panel.add(serviceSelection);
 		JButton lightingSelection = new JButton("Back to Light adjustment options");
 		panel.add(lightingSelection);
-				StreamObserver<LightingResponse> responseObserver = new StreamObserver<LightingResponse>() {
-					
-					//This will return a single server response containing details of all the lighting adjustments made in the client stream
-					@Override
-					public void onNext(LightingResponse value) {
-						serverResponse.append("***Server Response***\n");
-						serverResponse.append(value.getLightingMessage() + "\n");			
-					}
+		StreamObserver<LightingResponse> responseObserver = new StreamObserver<LightingResponse>() {
 
-					@Override
-					public void onError(Throwable t) {
-						t.printStackTrace();
-					}
+			// This will return a single server response containing details of all the
+			// lighting adjustments made in the client stream
+			@Override
+			public void onNext(LightingResponse value) {
+				serverResponse.append("***Server Response***\n");
+				serverResponse.append(value.getLightingMessage() + "\n");
+			}
 
-					@Override
-					public void onCompleted() {
-						serverResponse.append("Light Control rpc is completed!! Amount of light adjustments made: " + streamCounter);
-						//Reset the stream counter
-						streamCounter = 0;
-						
+			@Override
+			public void onError(Throwable t) {
+				t.printStackTrace();
+			}
+
+			@Override
+			public void onCompleted() {
+				serverResponse
+						.append("Light Control rpc is completed!! Amount of light adjustments made: " + streamCounter);
+				// Reset the stream counter
+				streamCounter = 0;
+
+			}
+
+		};
+		// Request
+		StreamObserver<Room> requestObserver = lightingAsyncStub.adjustLightingMultiRoom(responseObserver);
+		multiLightAdjust.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Increase the count of streams
+				if (streamCounter <= roomAmount) {
+					int roomIndex = roomList.getSelectedIndex();
+					int lightAdjustment = Integer.parseInt(textInput.getText());
+					requestObserver.onNext(Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
+							.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build());
+					// set the instances value
+					rooms.get(roomIndex).setBrightness(lightAdjustment);
+					streamCounter++;
+					// If the stream amount gets to the roomAmount call oncompleted()
+					if (streamCounter >= roomAmount) {
+						requestObserver.onCompleted();
 					}
-					
-				};
-				// Request
-				 StreamObserver<Room> requestObserver = lightingAsyncStub.adjustLightingMultiRoom(responseObserver);
-					multiLightAdjust.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							//Increase the count of streams
-							if(streamCounter<=roomAmount) {
-								int roomIndex = roomList.getSelectedIndex();
-								int lightAdjustment = Integer.parseInt(textInput.getText());
-								requestObserver.onNext(Room.newBuilder()
-										.setBrightness(rooms.get(roomIndex).getBrightness())
-										.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build());
-								//set the instances value
-								rooms.get(roomIndex).setBrightness(lightAdjustment);
-								streamCounter++;
-								//If the stream amount gets to the roomAmount call oncompleted()
-							if(streamCounter >= roomAmount) {
-									requestObserver.onCompleted();
-								}
-							}
-						}
-					});
+				}
+			}
+		});
 		serviceSelection.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				frame.setContentPane(initialiseStartPanel());
@@ -498,23 +496,13 @@ public class GUIClient {
 		}
 		occupantList.setBounds(180, 11, 57, 22);
 		panel.add(occupantList);
-		//Label for the timer
-		JLabel timerValue = new JLabel("");
-		panel.add(timerValue);
-		// Elevators 1-3
-		JButton elevatorRequest1 = new JButton("Request elevator 1");
-		elevatorRequest1.setBounds(5, 219, 150, 23);
+		JButton elevatorRequest1 = new JButton("Request Elevator");
+		elevatorRequest1.setBounds(180, 219, 150, 23);
 		panel.add(elevatorRequest1);
-		JButton elevatorRequest2 = new JButton("Request elevator 2");
-		elevatorRequest2.setBounds(5, 266, 150, 23);
-		panel.add(elevatorRequest2);
-		JButton elevatorRequest3 = new JButton("Request elevator 3");
-		elevatorRequest3.setBounds(281, 219, 150, 23);
-		panel.add(elevatorRequest3);
 		JButton serviceSelection = new JButton("Back to Service Selection");
-		serviceSelection.setBounds(260, 266, 150, 23);
+		serviceSelection.setBounds(170, 266, 200, 23);
 		panel.add(serviceSelection);
-		serverResponse = new JTextArea(5, 100);
+		serverResponse = new JTextArea(5, 520);
 		serverResponse.setLineWrap(true);
 		serverResponse.setWrapStyleWord(true);
 		JScrollPane scrollPane = new JScrollPane(serverResponse);
@@ -523,239 +511,90 @@ public class GUIClient {
 		JLabel serviceLabel = new JLabel("What is your occupant Id?");
 		serviceLabel.setBounds(21, 15, 787, 14);
 		panel.add(serviceLabel);
-
-		// Requests for elevator 1
-				StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
-					int currentFloor;
-
-					@Override
-					public void onNext(ElevatorResponse response) {
-						serverResponse.append(response.getElevatorMessage() + "\n");
-						currentFloor = response.getNextFloor();
-					}
-
-					@Override
-					public void onError(Throwable t) {
-						t.printStackTrace();
-
-					}
-
-					@Override
-					public void onCompleted() {
-						//Set the elevator floors instance
-						elevators.get(0).setCurrentFloor(currentFloor);
-						System.out.println("Elevator has finished its journey. Elevator currently on floor " + currentFloor);
-					}
-				};
-				// Request
-				StreamObserver<ElevatorRequest> requestObserver = elevatorAsyncStub.moveElevator(responseObserver);
-				//taskPerformer listener is to create a incrementing timer every time the elevator button is pressed
-				ActionListener taskPerformer = new ActionListener() {
-				      public void actionPerformed(ActionEvent evt) {
-				    	timerCount++;
-				    	if(timerCount >=8) {
-				    		swingTimer.stop();
-				    		requestObserver.onCompleted();
-				    	}
-				      }
-				    }; 
-				    swingTimer = new Timer(1000, taskPerformer);
-				elevatorRequest1.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						//Everytime the button is pressed, reset the timerCOunt to 0 and start the timer again
-				    	timerCount = 0;
-						swingTimer.start();
 		
-						// Get the occupant details
-						int occupantIndex = occupantList.getSelectedIndex();
-						int occupantId = occupants.get(occupantIndex).getId();
-						String occupantName = occupants.get(occupantIndex).getName();
-						int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
-						int roomNumber = occupants.get(occupantIndex).getRoomNumber();
-						// Get the elevator details
-						int elevatorIndex = 0;
-						int elevatorId = 1;
-						int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
-						int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
-						// Sets the travel direction
-						int travelDirection;
-						if (currentFloor < occupantFloor) {
-							travelDirection = 0;
-						} else if (currentFloor > occupantFloor) {
-							travelDirection = 1;
-						} else {
-							travelDirection = 2;
-						}
-						int amountOfPeople = elevators.get(elevatorIndex).getCurrentCapacity();
-						int lowestFloor = 0;
-						int highestFloor = 10;
-						int capacityLimit = elevators.get(elevatorIndex).getCapacityLimit();
-						boolean isMoving = elevators.get(elevatorIndex).getIsMoving();
-	
-						// Create Request
-						requestObserver.onNext(ElevatorRequest.newBuilder()
-								// Set the Occupant details(Id, name, floor, room number)
-								.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName)
-										.setRoomFloor(occupantFloor).setRoomNumber(roomNumber).build())
-								// Set the elevator details
-								.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
-										.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor)
-										.setHighestFloor(highestFloor).setCurrentCapacity(++amountOfPeople)
-										.setCapacityLimit(capacityLimit).setIsMoving(isMoving)
-										.setTDirectionValue(travelDirection))
-								.build());
-						elevators.get(elevatorIndex).setCurrentCapactity(amountOfPeople);
-					}
+		// ELEVATOR 1
+		StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
+			int currentFloor;
 
-				});
+			@Override
+			public void onNext(ElevatorResponse response) {
+				serverResponse.append(response.getElevatorMessage() + "\n");
+				currentFloor = response.getCurrentFloor();
+			}
 
-		// Requests for elevator 2
-//		elevatorRequest2.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
-//
-//					int currentFloor;
-//
-//					@Override
-//					public void onNext(ElevatorResponse response) {
-//
-//						serverResponse.append(response.getElevatorMessage() + "\n");
-//						currentFloor = response.getNextFloor();
-//
-//					}
-//
-//					@Override
-//					public void onError(Throwable t) {
-//						t.printStackTrace();
-//
-//					}
-//
-//					@Override
-//					public void onCompleted() {
-//						System.out.println(
-//								"Elevator 2 has finished its journey and is currently on floor " + currentFloor);
-//					}
-//				};
-//				StreamObserver<ElevatorRequest> requestObserver = elevatorAsyncStub.moveElevator(responseObserver);
-//				// Request
-//				// Get the occupant details
-//				int occupantIndex = occupantList.getSelectedIndex();
-//				int occupantId = occupants.get(occupantIndex).getId();
-//				String occupantName = occupants.get(occupantIndex).getName();
-//				int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
-//				int roomNumber = occupants.get(occupantIndex).getRoomNumber();
-//				// Get the elevator details
-//				int elevatorIndex = 1;
-//				int elevatorId = 2;
-//				int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
-//				int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
-//				int amountOfPeople = elevators.get(elevatorIndex).getCurrentCapacity();
-//				int lowestFloor = 0;
-//				int highestFloor = 10;
-//				int capacityLimit = elevators.get(elevatorIndex).getCapacityLimit();
-//				boolean isMoving = elevators.get(elevatorIndex).getIsMoving();
-//				int tDirection = 3;
-//				// if the elevator is moving and the current floor is below the destination
-//				// floor the travel direction is up
-//				if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex)
-//						.getCurrentFLoor() < elevators.get(elevatorIndex).getDestinationFloor()) {
-//					tDirection = 0;
-//					// if the elevator is moving and the current floor is above the destination
-//					// floor the travel direction is down
-//				} else if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex)
-//						.getCurrentFLoor() > elevators.get(elevatorIndex).getDestinationFloor()) {
-//					tDirection = 1;
-//				} else {
-//					tDirection = 3;
-//				}
-//				// Request
-//				requestObserver.onNext(ElevatorRequest.newBuilder()
-//						// Set the Occupant details(Id, name, floor, room number)
-//						.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName)
-//								.setRoomFloor(occupantFloor).setRoomNumber(roomNumber).build())
-//						// Set the elevator details
-//						.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
-//								.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor)
-//								.setHighestFloor(highestFloor).setCurrentCapacity(++amountOfPeople)
-//								.setCapacityLimit(capacityLimit).setIsMoving(isMoving).setTDirectionValue(tDirection))
-//						.build());
-//				elevators.get(elevatorIndex).setCurrentCapactity(amountOfPeople);
-//			}
-//		});
-//
-//		elevatorRequest3.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
-//					int currentFloor;
-//
-//					@Override
-//					public void onNext(ElevatorResponse response) {
-//
-//						serverResponse.append(response.getElevatorMessage() + "\n");
-//						currentFloor = response.getNextFloor();
-//
-//					}
-//
-//					@Override
-//					public void onError(Throwable t) {
-//						t.printStackTrace();
-//
-//					}
-//
-//					@Override
-//					public void onCompleted() {
-//						System.out.println(
-//								"Elevator 3 has finished its journey and is currently on floor " + currentFloor);
-//					}
-//				};
-//				//Request
-//				StreamObserver<ElevatorRequest> requestObserver = elevatorAsyncStub.moveElevator(responseObserver);
-//				// Request
-//				// Get the occupant details
-//				System.out.println("TESTING");
-//				int occupantIndex = occupantList.getSelectedIndex();
-//				int occupantId = occupants.get(occupantIndex).getId();
-//				String occupantName = occupants.get(occupantIndex).getName();
-//				int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
-//				int roomNumber = occupants.get(occupantIndex).getRoomNumber();
-//				// Get the elevator details
-//				int elevatorIndex = 2;
-//				int elevatorId = 3;
-//				int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
-//				int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
-//				int amountOfPeople = elevators.get(elevatorIndex).getCurrentCapacity();
-//				int lowestFloor = 0;
-//				int highestFloor = 10;
-//				int capacityLimit = elevators.get(elevatorIndex).getCapacityLimit();
-//				boolean isMoving = elevators.get(elevatorIndex).getIsMoving();
-//				int tDirection = 3;
-//				// if the elevator is moving and the current floor is below the destination
-//				// floor the travel direction is up
-//				if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex)
-//						.getCurrentFLoor() < elevators.get(elevatorIndex).getDestinationFloor()) {
-//					tDirection = 0;
-//					// if the elevator is moving and the current floor is above the destination
-//					// floor the travel direction is down
-//				} else if (elevators.get(elevatorIndex).getIsMoving() && elevators.get(elevatorIndex)
-//						.getCurrentFLoor() > elevators.get(elevatorIndex).getDestinationFloor()) {
-//					tDirection = 1;
-//				} else {
-//					tDirection = 3;
-//				}
-//				// Request
-//				requestObserver.onNext(ElevatorRequest.newBuilder()
-//						// Set the Occupant details(Id, name, floor, room number)
-//						.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName)
-//								.setRoomFloor(occupantFloor).setRoomNumber(roomNumber).build())
-//						// Set the elevator details
-//						.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
-//								.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor)
-//								.setHighestFloor(highestFloor).setCurrentCapacity(++amountOfPeople)
-//								.setCapacityLimit(capacityLimit).setIsMoving(isMoving).setTDirectionValue(tDirection))
-//						.build());
-//				elevators.get(elevatorIndex).setCurrentCapactity(amountOfPeople);
-//			}
-//		});
+			@Override
+			public void onError(Throwable t) {
+				t.printStackTrace();
+			}
+
+			@Override
+			public void onCompleted() {
+				//Set the elevator instances current floor
+				elevators.get(0).setCurrentFloor(currentFloor);
+				serverResponse.append("Elevator 1 has finished its journey. Elevator currently on floor " + currentFloor);
+				}
+		};
+		// Request
+		StreamObserver<ElevatorRequest> requestObserver = elevatorAsyncStub.moveElevator(responseObserver);
+		//e1Timer is to create a incrementing timer every time the elevator 1 button is pressed
+		ActionListener e1Timer = new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				timerCount++;
+				//If the timer gets to 8 seconds call the onCOmpleted method
+			  	if(timerCount >=8) {
+			  		swingTimer.stop();
+				    requestObserver.onCompleted();
+				}
+		    }
+		}; 
+		swingTimer = new Timer(1000, e1Timer);
+		elevatorRequest1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//Every time the button is pressed, reset the timerCount to 0 and start the timer again
+				timerCount = 0;
+				swingTimer.start();
+				// Get the occupant details
+				int occupantIndex = occupantList.getSelectedIndex();
+				int occupantId = occupants.get(occupantIndex).getId();
+				String occupantName = occupants.get(occupantIndex).getName();
+				int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
+				int roomNumber = occupants.get(occupantIndex).getRoomNumber();
+				// Get the elevator details
+				int elevatorIndex = 0;
+				int elevatorId = 1;
+				int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
+				int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
+				// Sets the travel direction
+				int travelDirection;
+				if (currentFloor < occupantFloor) {
+					travelDirection = 0;
+				} else {
+					travelDirection = 1;
+				}
+				int amountOfPeople = elevators.get(elevatorIndex).getCurrentCapacity();
+				int lowestFloor = 0;
+				int highestFloor = 10;
+				int capacityLimit = elevators.get(elevatorIndex).getCapacityLimit();
+				boolean isMoving = elevators.get(elevatorIndex).getIsMoving();	
+				// Create Request
+				requestObserver.onNext(ElevatorRequest.newBuilder()
+						// Set the Occupant details(Id, name, floor, room number)
+						.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName)
+						.setRoomFloor(occupantFloor).setRoomNumber(roomNumber)
+				.build())
+						// Set the elevator details
+						.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
+						.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor)
+						.setHighestFloor(highestFloor).setCurrentCapacity(++amountOfPeople)
+						.setCapacityLimit(capacityLimit).setIsMoving(isMoving)
+						.setTDirectionValue(travelDirection))
+				.build());
+				
+				//Update the elevator instances amountOfPeople variable
+				elevators.get(elevatorIndex).setCurrentCapactity(amountOfPeople);
+			}
+		});
+
 		serviceSelection.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				frame.setContentPane(initialiseStartPanel());
@@ -819,3 +658,4 @@ public class GUIClient {
 		return panel;
 	}
 }
+

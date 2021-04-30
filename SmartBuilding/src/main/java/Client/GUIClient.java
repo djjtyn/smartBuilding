@@ -17,6 +17,7 @@ import java.util.concurrent.CountDownLatch;
 //import OccupantService requirements
 import grpc.occupantService.Empty;
 import grpc.occupantService.GymTrainer;
+import grpc.occupantService.occupantServiceGrpc;
 import grpc.occupantService.occupantServiceGrpc.occupantServiceBlockingStub;
 //import LightingService requirements
 import grpc.lightingService.LightingResponse;
@@ -51,6 +52,7 @@ import javax.swing.Timer;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 public class GUIClient {
@@ -140,11 +142,11 @@ public class GUIClient {
 		// (1)Occupant Service Channel
 		String occupantService = " _http._tcp.local_occupantService.";
 		discoverService(occupantService);
-		// int occupantPort = serviceInfo.getPort();
-		// System.out.println("Occupant port: " + occupantPort);
-		// ManagedChannel occupantChannel = ManagedChannelBuilder.forAddress(host,
-		// occupantPort).usePlaintext().build();
-		// occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
+		 int occupantPort = 50053;
+		 System.out.println("Occupant port: " + occupantPort);
+		 ManagedChannel occupantChannel = ManagedChannelBuilder.forAddress(host,
+		 occupantPort).usePlaintext().build();
+		 occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
 
 		// (2)Lighting Service Channel
 		String lightingService = "_lightingService._tcp.local.";
@@ -222,34 +224,132 @@ public class GUIClient {
 		}
 	}
 
-	// This is for the occupant service
+	// Method to generate the GUI frame showing the different service types available
+	private <E> JPanel initialiseStartPanel() {
+		frame.setTitle("Client - Service Controller");
+		frame.setBounds(140, 140, 800, 600);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		BoxLayout bl = new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS);
+		frame.getContentPane().setLayout(bl);
+		JPanel panel = new JPanel();
+		frame.getContentPane().add(panel);
+		frame.setVisible(true);
+		//Button for the Occupant(Gym) services
+		JButton chooseOccupantService = new JButton("Choose occupant Service");
+		chooseOccupantService.setBounds(27, 185, 402, 57);
+		panel.add(chooseOccupantService);
+		chooseOccupantService.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(getOccupantServiceJPanel());
+				// Visibility Setting below is so the JFrame can load the selected options panel
+				frame.setVisible(false);
+				frame.setVisible(true);
+			}
+		});
+		//Button for the lighting services
+		JButton chooseLightControl = new JButton("Choose light control Service");
+		chooseLightControl.setBounds(27, 117, 402, 57);
+		panel.add(chooseLightControl);
+		chooseLightControl.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(getLightServiceChoices());
+				// Visibility Setting below is so the JFrame can load the selected options panel
+				frame.setVisible(false);
+				frame.setVisible(true);
+			}
+		});
+		//Button for the Elevator Service
+		JButton chooseElevator = new JButton("Choose Elevator Service");
+		chooseElevator.setBounds(27, 49, 402, 57);
+		panel.add(chooseElevator);
+		chooseElevator.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(getElevatorControl());
+				// Visibility Setting below is so the JFrame can load the selected options panel
+				frame.setVisible(false);
+				frame.setVisible(true);
+			}
+		});	
+		return panel;
+	}
+	
+	
+	// This is for the occupant service(SERVER STREAMING)
 	private JPanel getOccupantServiceJPanel() {
 		// View Gym Trainers
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		JButton listTrainers = new JButton("List Gym Trainers");
-		listTrainers.setBounds(109, 11, 196, 29);
+		listTrainers.setBounds(109, 5, 196, 29);
 		JButton serviceSelection = new JButton("Back to Service Selection");
+		serviceSelection.setBounds(115, 5, 196, 29);
 		panel.add(listTrainers);
 		panel.add(serviceSelection);
+		serverResponse = new JTextArea(20, 50);
+		serverResponse.setLineWrap(true);
+		serverResponse.setWrapStyleWord(true);
+		serverResponse.setBounds(5, 20, 100, 30);
+		JScrollPane scrollPane = new JScrollPane(serverResponse);
+		panel.add(scrollPane);
 		listTrainers.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Empty request = Empty.newBuilder().build();
 				// Response
-				Iterator<GymTrainer> responseIterator = occupantBlockingStub.viewGymTrainers(request);
-				int iterateCount = 1;
-				while (responseIterator.hasNext()) {
-					GymTrainer response = responseIterator.next();
-					serverResponse.append("***Gym Trainer " + iterateCount + "***\n" + response.toString() + "\n");
-					iterateCount++;
+				try {
+					Iterator<GymTrainer> responseIterator = occupantBlockingStub.viewGymTrainers(request);
+					int iterateCount = 1;
+					serverResponse.append("***SERVER STREAMING RESPONSE***\n");
+					while (responseIterator.hasNext()) {
+						GymTrainer response = responseIterator.next();
+						serverResponse.append("***Gym Trainer " + iterateCount + "***\n" + response.toString() + "\n");
+						iterateCount++;
+					}
+				} catch(StatusRuntimeException err) {
+					err.printStackTrace();
 				}
 			}
 		});
-		serverResponse = new JTextArea(20, 20);
-		serverResponse.setLineWrap(true);
-		serverResponse.setWrapStyleWord(true);
-		JScrollPane scrollPane = new JScrollPane(serverResponse);
-		panel.add(scrollPane);
+		//If this action is performed the user will be directed back to the starting GUI
+		serviceSelection.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(initialiseStartPanel());
+				// Visibility Setting below is so the JFrame can load the selected options panel
+				frame.setVisible(false);
+				frame.setVisible(true);
+			}
+		});
+		return panel;
+	}
+	
+	//This shows the options available for the lighting service(single or multiple room)
+	private JPanel getLightServiceChoices() {
+		JPanel panel = new JPanel();
+		frame.getContentPane().add(panel);
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		JButton singleRoom = new JButton("Adjust Lighting for ONE room");
+		singleRoom.setBounds(41, 28, 359, 95);
+		panel.add(singleRoom);
+		singleRoom.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(getSingleLightControl());
+				// Visibility Setting below is so the JFrame can load the selected options panel
+				frame.setVisible(false);
+				frame.setVisible(true);
+			}
+		});
+		JButton multiRoom = new JButton("Adjust Lighting for MULTIPLE rooms");
+		multiRoom.setBounds(41, 142, 359, 95);
+		panel.add(multiRoom);
+		multiRoom.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setContentPane(selectRoomAmount());
+				// Visibility Setting below is so the JFrame can load the selected options panel
+				frame.setVisible(false);
+				frame.setVisible(true);
+			}
+		});
+		JButton serviceSelection = new JButton("Back to Service Selection");
+		panel.add(serviceSelection);
 		serviceSelection.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				frame.setContentPane(initialiseStartPanel());
@@ -265,6 +365,7 @@ public class GUIClient {
 	private JPanel getSingleLightControl() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		//roomList combo box will list all the available rooms
 		JComboBox<String> roomList = new JComboBox<String>();
 		for (RoomDb room : rooms) {
 			roomList.addItem(room.getRoomName());
@@ -292,6 +393,7 @@ public class GUIClient {
 				int roomIndex = roomList.getSelectedIndex();
 				int lightAdjustment = (adjustmentLevel.getSelectedIndex() + 1);
 				if(lightAdjustment >=0 && lightAdjustment <= 100) {
+					// Request
 					Room lightRequest = Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
 						.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build();
 					// Response
@@ -302,6 +404,7 @@ public class GUIClient {
 				}
 			}
 		});
+		//If this action is performed the user will be redirected to the initial GUI screen
 		serviceSelection.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				frame.setContentPane(initialiseStartPanel());
@@ -310,6 +413,7 @@ public class GUIClient {
 				frame.setVisible(true);
 			}
 		});
+		//If this action is performed the user will be redirected to the different lighting services available
 		lightingSelection.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				frame.setContentPane(getLightServiceChoices());
@@ -327,7 +431,7 @@ public class GUIClient {
 		return panel;
 	}
 
-	// This is for choosing how many rooms the multi lighting will be used for
+	// This is for selecting how many rooms the multi lighting will be used for
 	private JPanel selectRoomAmount() {
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel);
@@ -392,8 +496,7 @@ public class GUIClient {
 		panel.add(lightingSelection);
 		StreamObserver<LightingResponse> responseObserver = new StreamObserver<LightingResponse>() {
 
-			// This will return a single server response containing details of all the
-			// lighting adjustments made in the client stream
+			// This will return a single server response containing details of all the lighting adjustments made in the client stream
 			@Override
 			public void onNext(LightingResponse value) {
 				serverResponse.append("***Server Response***\n");
@@ -407,37 +510,38 @@ public class GUIClient {
 
 			@Override
 			public void onCompleted() {
-				serverResponse
-						.append("Light Control rpc is completed!! Amount of light adjustments made: " + streamCounter);
+				serverResponse.append("Light Control rpc is completed!! Amount of light adjustments made: " + streamCounter);
 				// Reset the stream counter and clear the roomCOunt array list
 				streamCounter = 0;
 				roomCount.clear();
-
 			}
-
 		};
 		// Request
 		StreamObserver<Room> requestObserver = lightingAsyncStub.adjustLightingMultiRoom(responseObserver);
 		multiLightAdjust.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Increase the count of streams
-				if (streamCounter <= roomAmount) {
-					int roomIndex = roomList.getSelectedIndex();
-					int lightAdjustment = (adjustmentLevel.getSelectedIndex() + 1);
-					if(lightAdjustment >=0 && lightAdjustment <= 100) {
-						if(!roomCount.contains(roomIndex)) {
-							roomCount.add(roomIndex);
-							streamCounter++;
-							requestObserver.onNext(Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
-								.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build());
-							// set the instances value
-							rooms.get(roomIndex).setBrightness(lightAdjustment);
-							// If the stream amount gets to the roomAmount call oncompleted()
-							if (streamCounter == roomAmount) {
-								requestObserver.onCompleted();
+				try {
+					// Increase the count of streams
+					if (streamCounter <= roomAmount) {
+						int roomIndex = roomList.getSelectedIndex();
+						int lightAdjustment = (adjustmentLevel.getSelectedIndex() + 1);
+						if(lightAdjustment >=0 && lightAdjustment <= 100) {
+							if(!roomCount.contains(roomIndex)) {
+								roomCount.add(roomIndex);
+								streamCounter++;
+								requestObserver.onNext(Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
+									.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build());
+								// set the instances value
+								rooms.get(roomIndex).setBrightness(lightAdjustment);
+								// If the stream amount gets to the roomAmount call oncompleted()
+								if (streamCounter == roomAmount) {
+									requestObserver.onCompleted();
+								}
 							}
 						}
 					}
+				} catch(RuntimeException err) {
+					err.printStackTrace();
 				}
 			}
 		});
@@ -457,52 +561,11 @@ public class GUIClient {
 				frame.setVisible(true);
 			}
 		});
-		serverResponse = new JTextArea(5, 100);
+		serverResponse = new JTextArea(10, 100);
 		serverResponse.setLineWrap(true);
 		serverResponse.setWrapStyleWord(true);
 		JScrollPane scrollPane = new JScrollPane(serverResponse);
 		panel.add(scrollPane);
-		return panel;
-	}
-
-	// This shows the options available for the lighting service(single or multi
-	// room)
-	private JPanel getLightServiceChoices() {
-		JPanel panel = new JPanel();
-		frame.getContentPane().add(panel);
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		JButton singleRoom = new JButton("Adjust Lighting for ONE room");
-		singleRoom.setBounds(41, 28, 359, 95);
-		panel.add(singleRoom);
-		singleRoom.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				frame.setContentPane(getSingleLightControl());
-				// Visibility Setting below is so the JFrame can load the selected options panel
-				frame.setVisible(false);
-				frame.setVisible(true);
-			}
-		});
-		JButton multiRoom = new JButton("Adjust Lighting for MULTIPLE rooms");
-		multiRoom.setBounds(41, 142, 359, 95);
-		panel.add(multiRoom);
-		multiRoom.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				frame.setContentPane(selectRoomAmount());
-				// Visibility Setting below is so the JFrame can load the selected options panel
-				frame.setVisible(false);
-				frame.setVisible(true);
-			}
-		});
-		JButton serviceSelection = new JButton("Back to Service Selection");
-		panel.add(serviceSelection);
-		serviceSelection.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				frame.setContentPane(initialiseStartPanel());
-				// Visibility Setting below is so the JFrame can load the selected options panel
-				frame.setVisible(false);
-				frame.setVisible(true);
-			}
-		});
 		return panel;
 	}
 
@@ -519,22 +582,21 @@ public class GUIClient {
 		occupantList.setBounds(180, 11, 57, 22);
 		panel.add(occupantList);
 		JButton elevatorRequest1 = new JButton("Request Elevator");
-		elevatorRequest1.setBounds(180, 219, 150, 23);
+		elevatorRequest1.setBounds(280, 15, 150, 20);
 		panel.add(elevatorRequest1);
 		JButton serviceSelection = new JButton("Back to Service Selection");
-		serviceSelection.setBounds(170, 266, 200, 23);
+		serviceSelection.setBounds(21, 400, 200, 23);
 		panel.add(serviceSelection);
-		serverResponse = new JTextArea(5, 520);
+		serverResponse = new JTextArea(10, 100);
 		serverResponse.setLineWrap(true);
 		serverResponse.setWrapStyleWord(true);
 		JScrollPane scrollPane = new JScrollPane(serverResponse);
-		scrollPane.setBounds(5, 61, 435, 147);
+		scrollPane.setBounds(5, 61, 700, 300);
 		panel.add(scrollPane);
 		JLabel serviceLabel = new JLabel("What is your occupant Id?");
 		serviceLabel.setBounds(21, 15, 787, 14);
 		panel.add(serviceLabel);
 		
-		// ELEVATOR 1
 		StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorResponse>() {
 			int currentFloor;
 
@@ -554,7 +616,7 @@ public class GUIClient {
 				//Set the elevator instances current floor
 				elevators.get(0).setCurrentFloor(currentFloor);
 				serverResponse.append("Elevator 1 has finished its journey. Elevator currently on floor " + currentFloor);
-				//Remove all people in the elevator from the arraylist containing their details
+				//Remove all people in the elevator from the array list containing their details
 				//This array list will ensure the people counter doesn't increase when an occupant who has already requested the elevator requests it more than once 
 				peopleInElevator.clear();
 				}
@@ -575,52 +637,56 @@ public class GUIClient {
 		swingTimer = new Timer(1000, e1Timer);
 		elevatorRequest1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//Every time the button is pressed, reset the timerCount to 0 and start the timer again
-				timerCount = 0;
-				swingTimer.start();
-				// Get the occupant details
-				int occupantIndex = occupantList.getSelectedIndex();
-				int occupantId = occupants.get(occupantIndex).getId();
-				String occupantName = occupants.get(occupantIndex).getName();
-				int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
-				int roomNumber = occupants.get(occupantIndex).getRoomNumber();
-				// Get the elevator details
-				int elevatorIndex = 0;
-				int elevatorId = 1;
-				int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
-				int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
-				// Sets the travel direction
-				int travelDirection;
-				if (currentFloor < occupantFloor) {
-					travelDirection = 0;
-				} else {
-					travelDirection = 1;
+				try {
+					//Every time the button is pressed, reset the timerCount to 0 and start the timer again
+					timerCount = 0;
+					swingTimer.start();
+					// Get the occupant details
+					int occupantIndex = occupantList.getSelectedIndex();
+					int occupantId = occupants.get(occupantIndex).getId();
+					String occupantName = occupants.get(occupantIndex).getName();
+					int occupantFloor = occupants.get(occupantIndex).getRoomFloor();
+					int roomNumber = occupants.get(occupantIndex).getRoomNumber();
+					// Get the elevator details
+					int elevatorIndex = 0;
+					int elevatorId = 1;
+					int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
+					int destinationFloor = elevators.get(elevatorIndex).getDestinationFloor();
+					// Sets the travel direction
+					int travelDirection;
+					if (currentFloor < occupantFloor) {
+						travelDirection = 0;
+					} else {
+						travelDirection = 1;
+					}
+					int amountOfPeople = elevators.get(elevatorIndex).getCurrentCapacity();
+					//If the people in elevator array list doesn't contain the occupantId add it to the list
+					if(!peopleInElevator.contains(occupantId)) {
+						peopleInElevator.add(occupantId);
+					}
+					System.out.println(peopleInElevator);
+					int lowestFloor = 0;
+					int highestFloor = 10;
+					int capacityLimit = elevators.get(elevatorIndex).getCapacityLimit();
+					boolean isMoving = elevators.get(elevatorIndex).getIsMoving();	
+					// Create Request if the occupant hasn't already requested the elevator(This avoids duplicate requests that would increase the people count)
+						requestObserver.onNext(ElevatorRequest.newBuilder()
+							// Set the Occupant details(Id, name, floor, room number)
+							.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName)
+							.setRoomFloor(occupantFloor).setRoomNumber(roomNumber)
+						.build())
+							// Set the elevator details
+							.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
+							.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor)
+							.setHighestFloor(highestFloor).setCurrentCapacity(++amountOfPeople)
+							.setCapacityLimit(capacityLimit).setIsMoving(isMoving)
+							.setTDirectionValue(travelDirection))
+						.build());				
+					//Update the elevator instances amountOfPeople variable
+					elevators.get(elevatorIndex).setCurrentCapactity(peopleInElevator.size());
+				}catch(RuntimeException err) {
+					err.printStackTrace();
 				}
-				int amountOfPeople = elevators.get(elevatorIndex).getCurrentCapacity();
-				//If the people in elevator array list doesn't contain the occupantId add it to the list
-				if(!peopleInElevator.contains(occupantId)) {
-					peopleInElevator.add(occupantId);
-				}
-				System.out.println(peopleInElevator);
-				int lowestFloor = 0;
-				int highestFloor = 10;
-				int capacityLimit = elevators.get(elevatorIndex).getCapacityLimit();
-				boolean isMoving = elevators.get(elevatorIndex).getIsMoving();	
-				// Create Request if the occupant hasn't already requested the elevator(This avoids duplicate requests that would increase the people count)
-					requestObserver.onNext(ElevatorRequest.newBuilder()
-						// Set the Occupant details(Id, name, floor, room number)
-						.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName)
-						.setRoomFloor(occupantFloor).setRoomNumber(roomNumber)
-					.build())
-						// Set the elevator details
-						.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
-						.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor)
-						.setHighestFloor(highestFloor).setCurrentCapacity(++amountOfPeople)
-						.setCapacityLimit(capacityLimit).setIsMoving(isMoving)
-						.setTDirectionValue(travelDirection))
-					.build());				
-				//Update the elevator instances amountOfPeople variable
-				elevators.get(elevatorIndex).setCurrentCapactity(peopleInElevator.size());
 			}
 		});
 
@@ -632,58 +698,6 @@ public class GUIClient {
 				frame.setVisible(true);
 			}
 		});
-		return panel;
-	}
-
-	// Method to generate the GUI frame showing the different service types
-	// available
-	private <E> JPanel initialiseStartPanel() {
-		frame.setTitle("Client - Service Controller");
-		frame.setBounds(140, 140, 800, 600);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		BoxLayout bl = new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS);
-
-		frame.getContentPane().setLayout(bl);
-		JPanel panel = new JPanel();
-		frame.getContentPane().add(panel);
-		frame.setVisible(true);
-		JButton chooseOccupantService = new JButton("Choose occupant Service");
-		chooseOccupantService.setBounds(27, 185, 402, 57);
-		panel.add(chooseOccupantService);
-		chooseOccupantService.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				frame.setContentPane(getOccupantServiceJPanel());
-				// Visibility Setting below is so the JFrame can load the selected options panel
-				frame.setVisible(false);
-				frame.setVisible(true);
-			}
-		});
-		JButton chooseLightControl = new JButton("Choose light control Service");
-		chooseLightControl.setBounds(27, 117, 402, 57);
-		panel.add(chooseLightControl);
-		chooseLightControl.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				frame.setContentPane(getLightServiceChoices());
-				// Visibility Setting below is so the JFrame can load the selected options panel
-				frame.setVisible(false);
-				frame.setVisible(true);
-			}
-		});
-		
-
-		JButton chooseElevator = new JButton("Choose Elevator Service");
-		chooseElevator.setBounds(27, 49, 402, 57);
-		panel.add(chooseElevator);
-		chooseElevator.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				frame.setContentPane(getElevatorControl());
-				// Visibility Setting below is so the JFrame can load the selected options panel
-				frame.setVisible(false);
-				frame.setVisible(true);
-			}
-		});
-		
 		return panel;
 	}
 }

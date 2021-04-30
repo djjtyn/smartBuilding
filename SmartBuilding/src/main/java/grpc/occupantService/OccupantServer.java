@@ -82,19 +82,18 @@ public class OccupantServer extends occupantServiceImplBase {
 	public static void main(String[] args) throws IOException, InterruptedException {
 
 		// Create Trainer instances
-		trainers.add(0, new TrainerDb(1, "Jeddy Roycraft", "legs", "351-249-6784", "JeddyRoycraft@theGym.ie", true));
-		trainers.add(0, new TrainerDb(2, "Christan Galpen", "legs", "527-601-2945", "ChristanGalpen@theGym.ie", true));
-		trainers.add(0, new TrainerDb(3, "Mirella Tuite", "arms", "831-313-2896", "MirellaTuite@theGym.ie", true));
-		trainers.add(0, new TrainerDb(4, "Brander Abels", "arms", "455-776-8738", "BranderAbelst@theGym.ie", true));
-		trainers.add(0, new TrainerDb(5, "Geoffry Howford", "chest", "707-617-7422", "GeoffryHowford@theGym.ie", true));
-		trainers.add(0, new TrainerDb(6, "Libby Postance", "chest", "828-202-0601", "LibbyPostance@theGym.ie", true));
-		trainers.add(0, new TrainerDb(7, "Hedi Templar", "shoulders", "277-543-4931", "HediTemplar@theGym.ie", true));
-		trainers.add(0,
-				new TrainerDb(8, "Merrel McAtamney", "shoulders", "489-655-9332", "MerrelMcAtamney@theGym.ie", true));
-		trainers.add(0, new TrainerDb(9, "Hubert Ledgard", "back", "749-210-8912", "HubertLedgard@theGym.ie", true));
-		trainers.add(0, new TrainerDb(10, "Rozelle Coley", "back", "393-136-9775", "RozelleColeyt@theGym.ie", true));
-		trainers.add(0, new TrainerDb(11, "Asa Wornham", "core", "913-736-3924", "AsaWornham@theGym.ie", true));
-		trainers.add(0, new TrainerDb(12, "Rafe Ivison", "core", "432-442-9402", "RafeIvison@theGym.ie", true));
+		trainers.add(new TrainerDb(1, "Jeddy Roycraft", "legs", "351-249-6784", "JeddyRoycraft@theGym.ie", true));
+		trainers.add(new TrainerDb(2, "Christan Galpen", "legs", "527-601-2945", "ChristanGalpen@theGym.ie", true));
+		trainers.add(new TrainerDb(3, "Mirella Tuite", "arms", "831-313-2896", "MirellaTuite@theGym.ie", true));
+		trainers.add(new TrainerDb(4, "Brander Abels", "arms", "455-776-8738", "BranderAbelst@theGym.ie", true));
+		trainers.add(new TrainerDb(5, "Geoffry Howford", "chest", "707-617-7422", "GeoffryHowford@theGym.ie", true));
+		trainers.add(new TrainerDb(6, "Libby Postance", "chest", "828-202-0601", "LibbyPostance@theGym.ie", true));
+		trainers.add(new TrainerDb(7, "Hedi Templar", "shoulders", "277-543-4931", "HediTemplar@theGym.ie", true));
+		trainers.add(new TrainerDb(8, "Merrel McAtamney", "shoulders", "489-655-9332", "MerrelMcAtamney@theGym.ie", true));
+		trainers.add(new TrainerDb(9, "Hubert Ledgard", "back", "749-210-8912", "HubertLedgard@theGym.ie", true));
+		trainers.add(new TrainerDb(10, "Rozelle Coley", "back", "393-136-9775", "RozelleColeyt@theGym.ie", true));
+		trainers.add(new TrainerDb(11, "Asa Wornham", "core", "913-736-3924", "AsaWornham@theGym.ie", true));
+		trainers.add(new TrainerDb(12, "Rafe Ivison", "core", "432-442-9402", "RafeIvison@theGym.ie", true));
 
 		// Instantiate the occupant server
 		OccupantServer occupantServer = new OccupantServer();
@@ -126,9 +125,7 @@ public class OccupantServer extends occupantServiceImplBase {
 
 	
 	public void viewGymTrainers(Empty request, StreamObserver<GymTrainer> responseObserver) {
-		System.out.println("Receiving request for gym trainer details");
-
-		// Traverse the TrainerDb
+		// Traverse the TrainerDb and for each record create a response using the record details
 		for (int i = 0; i < trainers.size(); i++) {
 			GymTrainer response = GymTrainer.newBuilder().setId(trainers.get(i).getId())
 					.setName(trainers.get(i).getTrainerName()).setSpeciality(trainers.get(i).getTrainerSpeciality())
@@ -136,10 +133,9 @@ public class OccupantServer extends occupantServiceImplBase {
 					.setAvailableNow(trainers.get(i).isAvailableNow()).build();
 			responseObserver.onNext(response);
 			try {
-				// wait for a second
+				//wait before sending the responses
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

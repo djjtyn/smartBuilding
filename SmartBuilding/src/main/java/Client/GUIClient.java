@@ -22,6 +22,7 @@ import grpc.occupantService.occupantServiceGrpc.occupantServiceBlockingStub;
 import grpc.lightingService.LightingResponse;
 import grpc.lightingService.Room;
 import grpc.lightingService.RoomDb;
+import grpc.lightingService.lightingGrpc;
 import grpc.lightingService.lightingGrpc.lightingBlockingStub;
 import grpc.lightingService.lightingGrpc.lightingStub;
 //import ElevatorService requirements
@@ -61,6 +62,12 @@ public class GUIClient {
 
 	// This array list will contain the elevator details
 	static ArrayList<ElevatorDb> elevators = new ArrayList<>();
+	
+	//This array list will ensure the people counter doesn't increase with a duplicate request
+	ArrayList<Integer> peopleInElevator = new ArrayList<>();
+	
+	//This array list will ensure the room counter doesn't increase with a duplicate request
+	ArrayList<Integer> roomCount = new ArrayList<>();
 
 	// Create occupant stub(Only Blocking Stub needed)
 	private static occupantServiceBlockingStub occupantBlockingStub;
@@ -140,12 +147,12 @@ public class GUIClient {
 		// occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
 
 		// (2)Lighting Service Channel
-//		String lightingService = "_lightingService._tcp.local.";
-//		discoverService(lightingService);
-//		int lightingPort = 50052;
-//		ManagedChannel lightingChannel = ManagedChannelBuilder.forAddress(host, lightingPort).usePlaintext().build();
-//		lightingBlockingStub = lightingGrpc.newBlockingStub(lightingChannel);
-//		lightingAsyncStub = lightingGrpc.newStub(lightingChannel);
+		String lightingService = "_lightingService._tcp.local.";
+		discoverService(lightingService);
+		int lightingPort = 50052;
+		ManagedChannel lightingChannel = ManagedChannelBuilder.forAddress(host, lightingPort).usePlaintext().build();
+		lightingBlockingStub = lightingGrpc.newBlockingStub(lightingChannel);
+		lightingAsyncStub = lightingGrpc.newStub(lightingChannel);
 
 		// (2)Elevator Service Channel
 		String elevatorService = "_elevatorService._tcp.local.";
@@ -257,7 +264,7 @@ public class GUIClient {
 	// This is for the lighting service for a single room
 	private JPanel getSingleLightControl() {
 		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		JComboBox<String> roomList = new JComboBox<String>();
 		for (RoomDb room : rooms) {
 			roomList.addItem(room.getRoomName());
@@ -265,9 +272,12 @@ public class GUIClient {
 		panel.add(roomList);
 		JLabel serviceLabel = new JLabel("Adjust lighting to: ");
 		panel.add(serviceLabel);
-		textInput = new JTextField();
-		panel.add(textInput);
-		textInput.setColumns(3);
+		//JComboBox for the adjustment levels(1-100)
+		JComboBox<Integer> adjustmentLevel = new JComboBox<Integer>();
+		for(int i = 1; i <=100;i++) {
+			adjustmentLevel.addItem(i);
+		}
+		panel.add(adjustmentLevel);
 		JLabel lightingAdjust = new JLabel("Percent");
 		panel.add(lightingAdjust);
 		JButton singleLightAdjust = new JButton("Adjust Lighting");
@@ -280,14 +290,16 @@ public class GUIClient {
 			public void actionPerformed(ActionEvent e) {
 				// Request
 				int roomIndex = roomList.getSelectedIndex();
-				int lightAdjustment = Integer.parseInt(textInput.getText());
-				Room lightRequest = Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
+				int lightAdjustment = (adjustmentLevel.getSelectedIndex() + 1);
+				if(lightAdjustment >=0 && lightAdjustment <= 100) {
+					Room lightRequest = Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
 						.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build();
-				// Response
-				LightingResponse lightResponse = lightingBlockingStub.adjustLighting(lightRequest);
-				serverResponse.append(lightResponse.getLightingMessage() + "\n");
-				// Set the rooms instance brightness value after the change is made
-				rooms.get(roomIndex).setBrightness(lightResponse.getBrightnessValue());
+					// Response
+					LightingResponse lightResponse = lightingBlockingStub.adjustLighting(lightRequest);
+					serverResponse.append(lightResponse.getLightingMessage() + "\n");
+					// Set the rooms instance brightness value after the change is made
+					rooms.get(roomIndex).setBrightness(lightResponse.getBrightnessValue());
+				}
 			}
 		});
 		serviceSelection.addActionListener(new ActionListener() {
@@ -356,6 +368,7 @@ public class GUIClient {
 	// This is for setting the lighting service for a multiple rooms
 	private JPanel getMultiLightControl(int roomAmount) {
 		JPanel panel = new JPanel();
+		//JComboBox for the room names
 		JComboBox<String> roomList = new JComboBox<String>();
 		for (RoomDb room : rooms) {
 			roomList.addItem(room.getRoomName());
@@ -363,9 +376,12 @@ public class GUIClient {
 		panel.add(roomList);
 		JLabel multiLighting = new JLabel("Adjust lighting to: ");
 		panel.add(multiLighting);
-		textInput = new JTextField();
-		panel.add(textInput);
-		textInput.setColumns(3);
+		//JComboBox for the adjustment levels(1-100)
+		JComboBox<Integer> adjustmentLevel = new JComboBox<Integer>();
+		for(int i = 1; i <=100;i++) {
+			adjustmentLevel.addItem(i);
+		}
+		panel.add(adjustmentLevel);
 		JLabel multiLightingAdjust = new JLabel("Percent");
 		panel.add(multiLightingAdjust);
 		JButton multiLightAdjust = new JButton("Adjust Lighting");
@@ -393,8 +409,9 @@ public class GUIClient {
 			public void onCompleted() {
 				serverResponse
 						.append("Light Control rpc is completed!! Amount of light adjustments made: " + streamCounter);
-				// Reset the stream counter
+				// Reset the stream counter and clear the roomCOunt array list
 				streamCounter = 0;
+				roomCount.clear();
 
 			}
 
@@ -406,15 +423,20 @@ public class GUIClient {
 				// Increase the count of streams
 				if (streamCounter <= roomAmount) {
 					int roomIndex = roomList.getSelectedIndex();
-					int lightAdjustment = Integer.parseInt(textInput.getText());
-					requestObserver.onNext(Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
-							.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build());
-					// set the instances value
-					rooms.get(roomIndex).setBrightness(lightAdjustment);
-					streamCounter++;
-					// If the stream amount gets to the roomAmount call oncompleted()
-					if (streamCounter >= roomAmount) {
-						requestObserver.onCompleted();
+					int lightAdjustment = (adjustmentLevel.getSelectedIndex() + 1);
+					if(lightAdjustment >=0 && lightAdjustment <= 100) {
+						if(!roomCount.contains(roomIndex)) {
+							roomCount.add(roomIndex);
+							streamCounter++;
+							requestObserver.onNext(Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
+								.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build());
+							// set the instances value
+							rooms.get(roomIndex).setBrightness(lightAdjustment);
+							// If the stream amount gets to the roomAmount call oncompleted()
+							if (streamCounter == roomAmount) {
+								requestObserver.onCompleted();
+							}
+						}
 					}
 				}
 			}
@@ -488,7 +510,7 @@ public class GUIClient {
 	private JPanel getElevatorControl() {
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		JComboBox<Integer> occupantList = new JComboBox<Integer>();
 		panel.setLayout(null);
 		for (OccupantDb occupant : occupants) {
@@ -532,6 +554,9 @@ public class GUIClient {
 				//Set the elevator instances current floor
 				elevators.get(0).setCurrentFloor(currentFloor);
 				serverResponse.append("Elevator 1 has finished its journey. Elevator currently on floor " + currentFloor);
+				//Remove all people in the elevator from the arraylist containing their details
+				//This array list will ensure the people counter doesn't increase when an occupant who has already requested the elevator requests it more than once 
+				peopleInElevator.clear();
 				}
 		};
 		// Request
@@ -572,26 +597,30 @@ public class GUIClient {
 					travelDirection = 1;
 				}
 				int amountOfPeople = elevators.get(elevatorIndex).getCurrentCapacity();
+				//If the people in elevator array list doesn't contain the occupantId add it to the list
+				if(!peopleInElevator.contains(occupantId)) {
+					peopleInElevator.add(occupantId);
+				}
+				System.out.println(peopleInElevator);
 				int lowestFloor = 0;
 				int highestFloor = 10;
 				int capacityLimit = elevators.get(elevatorIndex).getCapacityLimit();
 				boolean isMoving = elevators.get(elevatorIndex).getIsMoving();	
-				// Create Request
-				requestObserver.onNext(ElevatorRequest.newBuilder()
+				// Create Request if the occupant hasn't already requested the elevator(This avoids duplicate requests that would increase the people count)
+					requestObserver.onNext(ElevatorRequest.newBuilder()
 						// Set the Occupant details(Id, name, floor, room number)
 						.setOccupant(Occupant.newBuilder().setId(occupantId).setName(occupantName)
 						.setRoomFloor(occupantFloor).setRoomNumber(roomNumber)
-				.build())
+					.build())
 						// Set the elevator details
 						.setElevator(Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor)
 						.setDestinationFLoor(destinationFloor).setLowestFloor(lowestFloor)
 						.setHighestFloor(highestFloor).setCurrentCapacity(++amountOfPeople)
 						.setCapacityLimit(capacityLimit).setIsMoving(isMoving)
 						.setTDirectionValue(travelDirection))
-				.build());
-				
+					.build());				
 				//Update the elevator instances amountOfPeople variable
-				elevators.get(elevatorIndex).setCurrentCapactity(amountOfPeople);
+				elevators.get(elevatorIndex).setCurrentCapactity(peopleInElevator.size());
 			}
 		});
 
@@ -610,7 +639,7 @@ public class GUIClient {
 	// available
 	private <E> JPanel initialiseStartPanel() {
 		frame.setTitle("Client - Service Controller");
-		frame.setBounds(140, 140, 540, 340);
+		frame.setBounds(140, 140, 800, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		BoxLayout bl = new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS);

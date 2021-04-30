@@ -180,8 +180,23 @@ public class LightingServer extends lightingImplBase {
 				StringBuilder sb = new StringBuilder();
 				// Traverse all the rooms in the room array list
 				for (int i = 0; i < rooms.size(); i++) {
-					sb.append(rooms.get(i).getRoomName() + " brightness adjusted to "
+					//If the brightness value is attempted to be adjusted past 100%
+					if(rooms.get(i).getBrightness() > 100) {
+						sb.append("You have attempted to adjust "  + rooms.get(i).getRoomName() + " brightness to " + rooms.get(i).getBrightness() + "%. The maximum brightness"
+								+ " levels can be set at is 100%. Resorting to 100% lighting");
+					//If the brightness value is attempted to be adjusted below 0%
+					}else if(rooms.get(i).getBrightness() < 0) {
+						sb.append("You have attempted to adjust "  + rooms.get(i).getRoomName() + " brightness to below " + rooms.get(i).getBrightness() + "%. "
+								+ "The minimum brightness levels can be set at is 0%(Lights Powered Off). Resorting to 0% lighting");
+					//If the brightness value is a valid request(1 - 100)
+					}else if((rooms.get(i).getBrightness() >= 0 || rooms.get(i).getBrightness() <=100)){
+					sb.append(rooms.get(i).getRoomName() + " brightness adjusted to " 
 							+ rooms.get(i).getBrightness() + "%.");
+					}
+					//If the brightness value entered isn't a number
+					else {
+						sb.append("You have entered an invalid figure to adjust the lighting to for " + rooms.get(i).getRoomName() + ". Please enter a valiue between 1 - 100");
+					}
 				}
 				// convert the string builder to a string and use it as the responses message
 				String responseString = sb.toString();

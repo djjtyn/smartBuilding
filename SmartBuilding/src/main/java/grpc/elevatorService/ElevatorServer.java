@@ -154,9 +154,6 @@ public class ElevatorServer extends elevatorImplBase {
 			@Override
 			public void onNext(ElevatorRequest value) {
 				occupantCounter = value.getElevator().getCurrentCapacity();
-				int tester = 0;
-				int elevatorId = value.getElevator().getId();
-				System.out.println("Elevator ID: " + elevatorId);
 				// if the current floor is the occupants floor they are wanting to go to floor 0
 				if (value.getOccupant().getRoomFloor() == value.getElevator().getCurrentFloor()) {
 					destinationFloor = 0;
@@ -165,14 +162,12 @@ public class ElevatorServer extends elevatorImplBase {
 				}
 				currentFloor = value.getElevator().getCurrentFloor();
 				if (value.getElevator().getCurrentCapacity() <= value.getElevator().getCapacityLimit()) {
-					System.out.println("Amount of people E1: " + value.getElevator().getCurrentCapacity());
 					// Add the destination floor to the floors arrayList if it isn't in the list
 					if (!eOneDestinationFloors.contains(value.getOccupant().getRoomFloor())) {
 						eOneDestinationFloors.add(destinationFloor);
 					}
-					System.out.println("Floor requests: " + eOneDestinationFloors);
 					ElevatorResponse response = ElevatorResponse.newBuilder()
-							.setElevatorMessage("Received request from occupant id: " + value.getOccupant().getId()
+							.setElevatorMessage("Server Response: Received request from occupant id: " + value.getOccupant().getId()
 							+ ". Request: Go from floor " + value.getElevator().getCurrentFloor() + " "
 							+ value.getElevator().getTDirection() + " to floor " + destinationFloor + " using elevator "
 							+ value.getElevator().getId() + ". Floor Requests " + eOneDestinationFloors)
@@ -181,7 +176,7 @@ public class ElevatorServer extends elevatorImplBase {
 				} else {
 					//If there are too many people in the elevator(>8)
 					ElevatorResponse response = ElevatorResponse.newBuilder()
-							.setElevatorMessage("Elevator has " + value.getElevator().getCurrentCapacity()
+							.setElevatorMessage("Server Response: Elevator has " + value.getElevator().getCurrentCapacity()
 							+ " people in it. Maximum capacity the elevator can accept is "
 							+ value.getElevator().getCapacityLimit())
 					.build();
@@ -199,7 +194,7 @@ public class ElevatorServer extends elevatorImplBase {
 				//If there are too many people in the elevator	
 				if(occupantCounter >=8) {
 					ElevatorResponse response = ElevatorResponse.newBuilder()
-							.setElevatorMessage("There are too many people in the elevator. Maximum the elevator can take is 8. There is currently " + (occupantCounter-8) +
+							.setElevatorMessage("Server Response: There are too many people in the elevator. Maximum the elevator can take is 8. There is currently " + (occupantCounter-8) +
 									" person(s) too many").build();
 					responseObserver.onNext(response);
 				}else {
@@ -253,7 +248,7 @@ public class ElevatorServer extends elevatorImplBase {
 							//If there are 2 or more destination floors left for the elevator
 							if(eOneDestinationFloors.size()>=2) {
 								ElevatorResponse response = ElevatorResponse.newBuilder()
-										.setElevatorMessage("Elevator going from floor " + currentFloor + " " + direction
+										.setElevatorMessage("Server Response: Elevator going from floor " + currentFloor + " " + direction
 										+ " to floor " + eOneDestinationFloors.remove(0) + ". Next floor(s): "
 										+ eOneDestinationFloors)
 										.setNextFloor(nextFloor).setCurrentFloor(currentFloor).build();
@@ -263,7 +258,7 @@ public class ElevatorServer extends elevatorImplBase {
 								//There is only one floor remaining in the elevator journey for this repsonse so the array list of the floors remaining isn't shown.
 								destinationFloor = eOneDestinationFloors.remove(0);
 								ElevatorResponse response = ElevatorResponse.newBuilder()
-										.setElevatorMessage("Elevator going from floor " + currentFloor + " " + direction
+										.setElevatorMessage("Server Response: Elevator going from floor " + currentFloor + " " + direction
 												+ " to floor " + destinationFloor)
 										.setCurrentFloor(destinationFloor).build();
 								currentFloor = destinationFloor;
@@ -271,7 +266,7 @@ public class ElevatorServer extends elevatorImplBase {
 								}
 							// assign the currentFLoor to the responses destination floor
 							ElevatorResponse responseTwo = ElevatorResponse.newBuilder()
-									.setElevatorMessage("Elevator has reached floor " + currentFloor).setCurrentFloor(currentFloor).build();
+									.setElevatorMessage("Server Response: Elevator has reached floor " + currentFloor).setCurrentFloor(currentFloor).build();
 	
 							try {
 								Thread.sleep(responseTime);

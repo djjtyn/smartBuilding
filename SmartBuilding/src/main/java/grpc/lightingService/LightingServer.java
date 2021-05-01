@@ -112,7 +112,7 @@ public class LightingServer extends lightingImplBase {
 		// If the lights are trying to be adjusted above 100%
 		if (request.getIntAdjust() > 100) {
 			LightingResponse response = LightingResponse.newBuilder().setBrightnessValue(100)
-					.setLightingMessage("Maximum the brighthness can be adjusted to is 100%."
+					.setLightingMessage("Server Response: Maximum the brightness can be adjusted to is 100%."
 							+ " You have attempted to adjust it to " + request.getIntAdjust()
 							+ "%. Resorting to 100% lighting. Room: " + request.getRoomName()
 							+ " lighting adjusted from " + request.getBrightness() + "% to 100%")
@@ -123,7 +123,7 @@ public class LightingServer extends lightingImplBase {
 		// If the lights are trying to be adjusted below 0%
 		else if (request.getIntAdjust() < 0) {
 			LightingResponse response = LightingResponse.newBuilder().setBrightnessValue(0)
-					.setLightingMessage("Minimum the brightness can be adjusted to is 0%. "
+					.setLightingMessage("Server Response: Minimum the brightness can be adjusted to is 0%. "
 							+ "You have attempted to adjust it to " + request.getIntAdjust()
 							+ "%. Resorting to 0% lighting(Lights powered off). Room: " + request.getRoomName()
 							+ " lighting adjusted from " + request.getBrightness() + "% to 0%")
@@ -134,7 +134,7 @@ public class LightingServer extends lightingImplBase {
 		// If the lights are already at the desired setting
 		else if (request.getIntAdjust() == request.getBrightness()) {
 			LightingResponse response = LightingResponse.newBuilder()
-					.setLightingMessage("The lights are already set at your desired setting- " + request.getIntAdjust()
+					.setLightingMessage("Server Response: The lights are already set at your desired setting- " + request.getIntAdjust()
 							+ "%. Room: " + request.getRoomName() + " lighting remaining at " + request.getBrightness()
 							+ "%")
 					.build();
@@ -142,10 +142,8 @@ public class LightingServer extends lightingImplBase {
 			responseObserver.onCompleted();
 		} // If its a valid request
 		else {
-			System.out.println("Receiving request to change the brightness of room: " + request.getRoomName() + " from "
-					+ request.getBrightness() + "% to " + request.getIntAdjust() + "%");
 			LightingResponse response = LightingResponse.newBuilder().setBrightnessValue(request.getIntAdjust())
-					.setLightingMessage("Room: " + request.getRoomName() + " lighting adjusted from "
+					.setLightingMessage("Server Response: Room: " + request.getRoomName() + " lighting adjusted from "
 							+ request.getBrightness() + "% to " + request.getIntAdjust() + "%")
 					.build();
 			responseObserver.onNext(response);
@@ -174,9 +172,7 @@ public class LightingServer extends lightingImplBase {
 
 			@Override
 			public void onCompleted() {
-				// System.out.println("Received requests for all rooms selected");
-				// Create a String builder so all the room names and their new brightness value
-				// can be seen
+				// Create a String builder so all the room names and their new brightness value can be displayed
 				StringBuilder sb = new StringBuilder();
 				// Traverse all the rooms in the room array list
 				for (int i = 0; i < rooms.size(); i++) {
@@ -191,7 +187,7 @@ public class LightingServer extends lightingImplBase {
 					//If the brightness value is a valid request(1 - 100)
 					}else if((rooms.get(i).getBrightness() >= 0 || rooms.get(i).getBrightness() <=100)){
 					sb.append(rooms.get(i).getRoomName() + " brightness adjusted to " 
-							+ rooms.get(i).getBrightness() + "%.");
+							+ rooms.get(i).getBrightness() + "%.\n");
 					}
 					//If the brightness value entered isn't a number
 					else {

@@ -12,7 +12,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
-import java.util.concurrent.CountDownLatch;
 
 //import OccupantService requirements
 import grpc.occupantService.Empty;
@@ -152,6 +151,7 @@ public class GUIClient {
 		}
 		ManagedChannel occupantChannel = ManagedChannelBuilder.forAddress(occupantHost,occupantPort).usePlaintext().build();
 		occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
+		System.out.println("Occupant service Added on port " + occupantPort + ". Host: " + occupantHost);
 
 		// (2)Lighting Service Channel
 		String lightingService = "_lightingService._tcp.local.";
@@ -167,6 +167,8 @@ public class GUIClient {
 		}
 		ManagedChannel lightingChannel = ManagedChannelBuilder.forAddress(lightingHost,lightingPort).usePlaintext().build();
 		lightingBlockingStub = lightingGrpc.newBlockingStub(lightingChannel);
+		lightingAsyncStub = lightingGrpc.newStub(lightingChannel);
+		System.out.println("Lighting service Added on port " + lightingPort + ". Host: " + lightingHost);
 
 		// (3)Elevator Service Channel
 		String elevatorService = "_elevatorService._tcp.local.";
@@ -182,6 +184,7 @@ public class GUIClient {
 		}
 		ManagedChannel elevatorChannel = ManagedChannelBuilder.forAddress(elevatorHost, elevatorPort).usePlaintext().build();
 		elevatorAsyncStub = elevatorGrpc.newStub(elevatorChannel);
+		System.out.println("Elevator service Added on port " + elevatorPort + ". Host: " + elevatorHost);
 
 		initialiseStartPanel();
 
@@ -189,7 +192,6 @@ public class GUIClient {
 
 	// Method to discover the services
 	private void discoverService(String service) {
-		System.out.println("Service: " + service);
 		try {
 			// Create a JmDNS instance
 			JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
@@ -311,7 +313,8 @@ public class GUIClient {
 					serverResponse.append("***SERVER STREAMING RESPONSE***\n");
 					while (responseIterator.hasNext()) {
 						GymTrainer response = responseIterator.next();
-						serverResponse.append("***Gym Trainer " + iterateCount + "***\n" + response.toString() + "\n");
+						serverResponse.append("\n");
+						serverResponse.append("***ServerStream " + iterateCount + ": Gym Trainer " + iterateCount + "***\n" + response.toString() + "\n");
 						iterateCount++;
 					}
 				} catch(StatusRuntimeException err) {
@@ -397,6 +400,12 @@ public class GUIClient {
 		panel.add(serviceSelection);
 		JButton lightingSelection = new JButton("Back to Light adjustment options");
 		panel.add(lightingSelection);
+		serverResponse = new JTextArea(10, 60);
+		serverResponse.setLineWrap(true);
+		serverResponse.setWrapStyleWord(true);
+		JScrollPane scrollPane = new JScrollPane(serverResponse);
+		scrollPane.setBounds(5, 61, 700, 300);
+		panel.add(scrollPane);
 		singleLightAdjust.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Request
@@ -406,6 +415,8 @@ public class GUIClient {
 					// Request
 					Room lightRequest = Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
 						.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build();
+					serverResponse.append("Client Request: Adjust lighting for " + rooms.get(roomIndex).getRoomName() + " from " + rooms.get(roomIndex).getBrightness() 
+							+ "% to " + lightAdjustment + "%\n");
 					// Response
 					LightingResponse lightResponse = lightingBlockingStub.adjustLighting(lightRequest);
 					serverResponse.append(lightResponse.getLightingMessage() + "\n");
@@ -432,12 +443,6 @@ public class GUIClient {
 				frame.setVisible(true);
 			}
 		});
-		serverResponse = new JTextArea(5, 40);
-		panel.add(serverResponse);
-		serverResponse.setLineWrap(true);
-		serverResponse.setWrapStyleWord(true);
-		JScrollPane scrollPane = new JScrollPane(serverResponse);
-		panel.add(scrollPane);
 		return panel;
 	}
 
@@ -458,8 +463,7 @@ public class GUIClient {
 		panel.add(selectRoomAmount);
 		selectRoomAmount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				int roomAmount = roomList.getSelectedIndex() + 1; // This will be used as the argument for the multi
-																	// lighting method
+				int roomAmount = roomList.getSelectedIndex() + 1; // This will be used as the argument for the multi lighting method
 				frame.setContentPane(getMultiLightControl(roomAmount));
 				// Visibility Setting below is so the JFrame can load the selected options panel
 				frame.setVisible(false);
@@ -501,9 +505,18 @@ public class GUIClient {
 		JButton multiLightAdjust = new JButton("Adjust Lighting");
 		panel.add(multiLightAdjust);
 		JButton serviceSelection = new JButton("Back to Service Selection");
+		serviceSelection.setBounds(21, 400, 200, 23);
 		panel.add(serviceSelection);
 		JButton lightingSelection = new JButton("Back to Light adjustment options");
+		lightingSelection.setBounds(21, 900, 200, 23);
+
 		panel.add(lightingSelection);
+		serverResponse = new JTextArea(10, 60);
+		serverResponse.setLineWrap(true);
+		serverResponse.setWrapStyleWord(true);
+		JScrollPane scrollPane = new JScrollPane(serverResponse);
+		scrollPane.setBounds(5, 61, 500, 300);
+		panel.add(scrollPane);
 		StreamObserver<LightingResponse> responseObserver = new StreamObserver<LightingResponse>() {
 
 			// This will return a single server response containing details of all the lighting adjustments made in the client stream
@@ -541,6 +554,8 @@ public class GUIClient {
 								streamCounter++;
 								requestObserver.onNext(Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
 									.setRoomName(rooms.get(roomIndex).getRoomName()).setIntAdjust(lightAdjustment).build());
+								serverResponse.append("Client Request " + streamCounter + ": Adjust lighting for " + rooms.get(roomIndex).getRoomName() + " from " 
+									+ rooms.get(roomIndex).getBrightness() + "% to " + lightAdjustment + "%\n");
 								// set the instances value
 								rooms.get(roomIndex).setBrightness(lightAdjustment);
 								// If the stream amount gets to the roomAmount call oncompleted()
@@ -571,13 +586,9 @@ public class GUIClient {
 				frame.setVisible(true);
 			}
 		});
-		serverResponse = new JTextArea(10, 100);
-		serverResponse.setLineWrap(true);
-		serverResponse.setWrapStyleWord(true);
-		JScrollPane scrollPane = new JScrollPane(serverResponse);
-		panel.add(scrollPane);
 		return panel;
 	}
+	
 
 	// This is for the elevator service
 	private JPanel getElevatorControl() {
@@ -676,7 +687,6 @@ public class GUIClient {
 					if(!peopleInElevator.contains(occupantId)) {
 						peopleInElevator.add(occupantId);
 					}
-					System.out.println(peopleInElevator);
 					int lowestFloor = 0;
 					int highestFloor = 10;
 					int capacityLimit = elevators.get(elevatorIndex).getCapacityLimit();
@@ -693,7 +703,8 @@ public class GUIClient {
 							.setHighestFloor(highestFloor).setCurrentCapacity(++amountOfPeople)
 							.setCapacityLimit(capacityLimit).setIsMoving(isMoving)
 							.setTDirectionValue(travelDirection))
-						.build());				
+						.build());
+						serverResponse.append("Client Request made by occupant ID " + occupantId + ": "+ occupantName + "\n");
 					//Update the elevator instances amountOfPeople variable
 					elevators.get(elevatorIndex).setCurrentCapactity(peopleInElevator.size());
 				}catch(RuntimeException err) {

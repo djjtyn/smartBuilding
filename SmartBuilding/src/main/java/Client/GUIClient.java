@@ -154,7 +154,7 @@ public class GUIClient {
 		System.out.println("Occupant service Added on port " + occupantPort + ". Host: " + occupantHost);
 
 		// (2)Lighting Service Channel
-		String lightingService = "_lightingService._tcp.local.";
+		String lightingService = "_http._tcp.local_lightingService.";
 		String lightingHost;
 		int lightingPort;
 		try {
@@ -171,7 +171,7 @@ public class GUIClient {
 		System.out.println("Lighting service Added on port " + lightingPort + ". Host: " + lightingHost);
 
 		// (3)Elevator Service Channel
-		String elevatorService = "_elevatorService._tcp.local.";
+		String elevatorService = "_http._tcp.local_elevatorService.";
 		String elevatorHost;
 		int elevatorPort;
 		try {
@@ -388,7 +388,7 @@ public class GUIClient {
 		panel.add(serviceLabel);
 		//JComboBox for the adjustment levels(1-100)
 		JComboBox<Integer> adjustmentLevel = new JComboBox<Integer>();
-		for(int i = 1; i <=100;i++) {
+		for(int i = 0; i <=100;i++) {
 			adjustmentLevel.addItem(i);
 		}
 		panel.add(adjustmentLevel);
@@ -410,7 +410,7 @@ public class GUIClient {
 			public void actionPerformed(ActionEvent e) {
 				// Request
 				int roomIndex = roomList.getSelectedIndex();
-				int lightAdjustment = (adjustmentLevel.getSelectedIndex() + 1);
+				int lightAdjustment = (adjustmentLevel.getSelectedIndex());
 				if(lightAdjustment >=0 && lightAdjustment <= 100) {
 					// Request
 					Room lightRequest = Room.newBuilder().setBrightness(rooms.get(roomIndex).getBrightness())
@@ -496,7 +496,7 @@ public class GUIClient {
 		panel.add(multiLighting);
 		//JComboBox for the adjustment levels(1-100)
 		JComboBox<Integer> adjustmentLevel = new JComboBox<Integer>();
-		for(int i = 1; i <=100;i++) {
+		for(int i = 0; i <=100;i++) {
 			adjustmentLevel.addItem(i);
 		}
 		panel.add(adjustmentLevel);
@@ -547,7 +547,7 @@ public class GUIClient {
 					// Increase the count of streams
 					if (streamCounter <= roomAmount) {
 						int roomIndex = roomList.getSelectedIndex();
-						int lightAdjustment = (adjustmentLevel.getSelectedIndex() + 1);
+						int lightAdjustment = (adjustmentLevel.getSelectedIndex());
 						if(lightAdjustment >=0 && lightAdjustment <= 100) {
 							if(!roomCount.contains(roomIndex)) {
 								roomCount.add(roomIndex);

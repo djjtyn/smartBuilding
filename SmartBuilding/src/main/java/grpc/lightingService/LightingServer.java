@@ -115,7 +115,7 @@ public class LightingServer extends lightingImplBase {
 					.setLightingMessage("Server Response: Maximum the brightness can be adjusted to is 100%."
 							+ " You have attempted to adjust it to " + request.getIntAdjust()
 							+ "%. Resorting to 100% lighting. Room: " + request.getRoomName()
-							+ " lighting adjusted from " + request.getBrightness() + "% to 100%")
+							+ " lighting adjusted from " + request.getBrightness() + "% to 100%").setBrightnessValue(100)
 					.build();
 			responseObserver.onNext(response);
 			responseObserver.onCompleted();
@@ -126,7 +126,7 @@ public class LightingServer extends lightingImplBase {
 					.setLightingMessage("Server Response: Minimum the brightness can be adjusted to is 0%. "
 							+ "You have attempted to adjust it to " + request.getIntAdjust()
 							+ "%. Resorting to 0% lighting(Lights powered off). Room: " + request.getRoomName()
-							+ " lighting adjusted from " + request.getBrightness() + "% to 0%")
+							+ " lighting adjusted from " + request.getBrightness() + "% to 0%").setBrightnessValue(0)
 					.build();
 			responseObserver.onNext(response);
 			responseObserver.onCompleted();
@@ -136,7 +136,7 @@ public class LightingServer extends lightingImplBase {
 			LightingResponse response = LightingResponse.newBuilder()
 					.setLightingMessage("Server Response: The lights are already set at your desired setting- " + request.getIntAdjust()
 							+ "%. Room: " + request.getRoomName() + " lighting remaining at " + request.getBrightness()
-							+ "%")
+							+ "%").setBrightnessValue(request.getIntAdjust())
 					.build();
 			responseObserver.onNext(response);
 			responseObserver.onCompleted();

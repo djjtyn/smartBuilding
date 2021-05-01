@@ -181,7 +181,7 @@ public class ElevatorServer extends elevatorImplBase {
 				} else {
 					//If there are too many people in the elevator(>8)
 					ElevatorResponse response = ElevatorResponse.newBuilder()
-							.setElevatorMessage("Elevator 1 has " + value.getElevator().getCurrentCapacity()
+							.setElevatorMessage("Elevator has " + value.getElevator().getCurrentCapacity()
 							+ " people in it. Maximum capacity the elevator can accept is "
 							+ value.getElevator().getCapacityLimit())
 					.build();

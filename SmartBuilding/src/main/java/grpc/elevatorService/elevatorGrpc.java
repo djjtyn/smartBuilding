@@ -62,38 +62,6 @@ public final class elevatorGrpc {
      return getMoveElevatorMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<grpc.elevatorService.Elevator,
-      grpc.elevatorService.ElevatorResponse> getReturnToGroundFloorMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "returnToGroundFloor",
-      requestType = grpc.elevatorService.Elevator.class,
-      responseType = grpc.elevatorService.ElevatorResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<grpc.elevatorService.Elevator,
-      grpc.elevatorService.ElevatorResponse> getReturnToGroundFloorMethod() {
-    io.grpc.MethodDescriptor<grpc.elevatorService.Elevator, grpc.elevatorService.ElevatorResponse> getReturnToGroundFloorMethod;
-    if ((getReturnToGroundFloorMethod = elevatorGrpc.getReturnToGroundFloorMethod) == null) {
-      synchronized (elevatorGrpc.class) {
-        if ((getReturnToGroundFloorMethod = elevatorGrpc.getReturnToGroundFloorMethod) == null) {
-          elevatorGrpc.getReturnToGroundFloorMethod = getReturnToGroundFloorMethod = 
-              io.grpc.MethodDescriptor.<grpc.elevatorService.Elevator, grpc.elevatorService.ElevatorResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "elevatorService.elevator", "returnToGroundFloor"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  grpc.elevatorService.Elevator.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  grpc.elevatorService.ElevatorResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new elevatorMethodDescriptorSupplier("returnToGroundFloor"))
-                  .build();
-          }
-        }
-     }
-     return getReturnToGroundFloorMethod;
-  }
-
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -134,16 +102,6 @@ public final class elevatorGrpc {
       return asyncUnimplementedStreamingCall(getMoveElevatorMethod(), responseObserver);
     }
 
-    /**
-     * <pre>
-     *unary streaming rpc
-     * </pre>
-     */
-    public void returnToGroundFloor(grpc.elevatorService.Elevator request,
-        io.grpc.stub.StreamObserver<grpc.elevatorService.ElevatorResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getReturnToGroundFloorMethod(), responseObserver);
-    }
-
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -153,13 +111,6 @@ public final class elevatorGrpc {
                 grpc.elevatorService.ElevatorRequest,
                 grpc.elevatorService.ElevatorResponse>(
                   this, METHODID_MOVE_ELEVATOR)))
-          .addMethod(
-            getReturnToGroundFloorMethod(),
-            asyncUnaryCall(
-              new MethodHandlers<
-                grpc.elevatorService.Elevator,
-                grpc.elevatorService.ElevatorResponse>(
-                  this, METHODID_RETURN_TO_GROUND_FLOOR)))
           .build();
     }
   }
@@ -195,17 +146,6 @@ public final class elevatorGrpc {
       return asyncBidiStreamingCall(
           getChannel().newCall(getMoveElevatorMethod(), getCallOptions()), responseObserver);
     }
-
-    /**
-     * <pre>
-     *unary streaming rpc
-     * </pre>
-     */
-    public void returnToGroundFloor(grpc.elevatorService.Elevator request,
-        io.grpc.stub.StreamObserver<grpc.elevatorService.ElevatorResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getReturnToGroundFloorMethod(), getCallOptions()), request, responseObserver);
-    }
   }
 
   /**
@@ -227,16 +167,6 @@ public final class elevatorGrpc {
     protected elevatorBlockingStub build(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
       return new elevatorBlockingStub(channel, callOptions);
-    }
-
-    /**
-     * <pre>
-     *unary streaming rpc
-     * </pre>
-     */
-    public grpc.elevatorService.ElevatorResponse returnToGroundFloor(grpc.elevatorService.Elevator request) {
-      return blockingUnaryCall(
-          getChannel(), getReturnToGroundFloorMethod(), getCallOptions(), request);
     }
   }
 
@@ -260,21 +190,9 @@ public final class elevatorGrpc {
         io.grpc.CallOptions callOptions) {
       return new elevatorFutureStub(channel, callOptions);
     }
-
-    /**
-     * <pre>
-     *unary streaming rpc
-     * </pre>
-     */
-    public com.google.common.util.concurrent.ListenableFuture<grpc.elevatorService.ElevatorResponse> returnToGroundFloor(
-        grpc.elevatorService.Elevator request) {
-      return futureUnaryCall(
-          getChannel().newCall(getReturnToGroundFloorMethod(), getCallOptions()), request);
-    }
   }
 
-  private static final int METHODID_RETURN_TO_GROUND_FLOOR = 0;
-  private static final int METHODID_MOVE_ELEVATOR = 1;
+  private static final int METHODID_MOVE_ELEVATOR = 0;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -293,10 +211,6 @@ public final class elevatorGrpc {
     @java.lang.SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
-        case METHODID_RETURN_TO_GROUND_FLOOR:
-          serviceImpl.returnToGroundFloor((grpc.elevatorService.Elevator) request,
-              (io.grpc.stub.StreamObserver<grpc.elevatorService.ElevatorResponse>) responseObserver);
-          break;
         default:
           throw new AssertionError();
       }
@@ -362,7 +276,6 @@ public final class elevatorGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new elevatorFileDescriptorSupplier())
               .addMethod(getMoveElevatorMethod())
-              .addMethod(getReturnToGroundFloorMethod())
               .build();
         }
       }

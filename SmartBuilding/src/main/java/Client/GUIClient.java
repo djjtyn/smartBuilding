@@ -130,82 +130,92 @@ public class GUIClient {
 
 	// Create the Applications using class constructor
 	public GUIClient() {
-		int port;
-		String host = "localhost";
 
 		// Create some room records
 		for (int i = 0; i < 30; i++) {
 			rooms.add(i, new RoomDb((i + 1), "Room " + (1 + i), 0, 0, 0.0));
 		}
 
-		// Build the channels
+		/* Build the channels(My local machine is having issues retrieving the service info from the discoverServices method so 
+		** I have made use of try/catch blocks to hard code the host and ports with the appropriate details if needed)*/
 		// (1)Occupant Service Channel
-		String occupantService = " _http._tcp.local_occupantService.";
-		discoverService(occupantService);
-		 int occupantPort = 50053;
-		 System.out.println("Occupant port: " + occupantPort);
-		 ManagedChannel occupantChannel = ManagedChannelBuilder.forAddress(host,
-		 occupantPort).usePlaintext().build();
-		 occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
+		String occupantService = "_http._tcp.local_occupantService.";
+		String occupantHost;
+		int occupantPort;
+		try {
+			discoverService(occupantService);
+			occupantHost = serviceInfo.getHostAddresses()[0];
+			occupantPort = serviceInfo.getPort();
+		}catch(RuntimeException e) {
+			occupantHost = "localhost";
+			occupantPort = 50053;
+		}
+		ManagedChannel occupantChannel = ManagedChannelBuilder.forAddress(occupantHost,occupantPort).usePlaintext().build();
+		occupantBlockingStub = occupantServiceGrpc.newBlockingStub(occupantChannel);
 
 		// (2)Lighting Service Channel
 		String lightingService = "_lightingService._tcp.local.";
-		discoverService(lightingService);
-		int lightingPort = 50052;
-		ManagedChannel lightingChannel = ManagedChannelBuilder.forAddress(host, lightingPort).usePlaintext().build();
+		String lightingHost;
+		int lightingPort;
+		try {
+			discoverService(lightingService);
+			lightingHost = serviceInfo.getHostAddresses()[0];
+			lightingPort = serviceInfo.getPort();
+		}catch(RuntimeException e) {
+			lightingHost = "localhost";
+			lightingPort = 50052;
+		}
+		ManagedChannel lightingChannel = ManagedChannelBuilder.forAddress(lightingHost,lightingPort).usePlaintext().build();
 		lightingBlockingStub = lightingGrpc.newBlockingStub(lightingChannel);
-		lightingAsyncStub = lightingGrpc.newStub(lightingChannel);
 
-		// (2)Elevator Service Channel
+		// (3)Elevator Service Channel
 		String elevatorService = "_elevatorService._tcp.local.";
-		discoverService(elevatorService);
-		int elevatorPort = 50051;
-		ManagedChannel elevatorChannel = ManagedChannelBuilder.forAddress(host, elevatorPort).usePlaintext().build();
+		String elevatorHost;
+		int elevatorPort;
+		try {
+			discoverService(elevatorService);
+			elevatorHost = serviceInfo.getHostAddresses()[0];
+			elevatorPort = serviceInfo.getPort();
+		}catch(RuntimeException e) {
+			elevatorHost = "localhost";
+			elevatorPort = 50051;
+		}
+		ManagedChannel elevatorChannel = ManagedChannelBuilder.forAddress(elevatorHost, elevatorPort).usePlaintext().build();
 		elevatorAsyncStub = elevatorGrpc.newStub(elevatorChannel);
 
 		initialiseStartPanel();
 
 	}
 
-	// Method to discover the occupant Services
-	// THIS ISN'T GETTING THE CORRECT PORT!!!
+	// Method to discover the services
 	private void discoverService(String service) {
 		System.out.println("Service: " + service);
-		int port;
-		String host;
 		try {
 			// Create a JmDNS instance
 			JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
-
 			jmdns.addServiceListener(service, new ServiceListener() {
 
 				@Override
 				public void serviceResolved(ServiceEvent event) {
-					System.out.println("This is never called");
 					System.out.println("Service resolved: " + event.getInfo());
-
-					// serviceInfo = event.getInfo();
-
-					// int port = serviceInfo.getPort();
-
-//					System.out.println("resolving " + service + " with properties ...");
-//					System.out.println("\t port: " + port);
-//					System.out.println("\t type:" + event.getType());
-//					System.out.println("\t name: " + event.getName());
-//					System.out.println("\t description/properties: " + serviceInfo.getNiceTextString());
-//					System.out.println("\t host: " + serviceInfo.getHostAddresses()[0]);
+					serviceInfo = event.getInfo();
+					int port = serviceInfo.getPort();
+					System.out.println("resolving " + service + " with properties ...");
+					System.out.println("\t port: " + port);
+					System.out.println("\t type:" + event.getType());
+					System.out.println("\t name: " + event.getName());
+					System.out.println("\t description/properties: " + serviceInfo.getNiceTextString());
+					System.out.println("\t host: " + serviceInfo.getHostAddresses()[0]);
 				}
 
 				@Override
 				public void serviceRemoved(ServiceEvent event) {
-					System.out.println("Occupant Service removed: " + event.getInfo());
+					System.out.println("Service removed: " + event.getInfo());
 				}
 
 				@Override
 				public void serviceAdded(ServiceEvent event) {
-					System.out.println("iam here");
-					System.out.println("Service name: " + event.getInfo().getServer());
-					System.out.println("Occupant Service added: " + event.getInfo());
+					System.out.println("Service added: " + event.getInfo());
 				}
 			});
 
@@ -615,10 +625,12 @@ public class GUIClient {
 			public void onCompleted() {
 				//Set the elevator instances current floor
 				elevators.get(0).setCurrentFloor(currentFloor);
-				serverResponse.append("Elevator 1 has finished its journey. Elevator currently on floor " + currentFloor);
+				serverResponse.append("Elevator has finished its journey. Elevator currently on floor " + currentFloor);
 				//Remove all people in the elevator from the array list containing their details
 				//This array list will ensure the people counter doesn't increase when an occupant who has already requested the elevator requests it more than once 
 				peopleInElevator.clear();
+				swingTimer.restart();
+				swingTimer.stop();
 				}
 		};
 		// Request

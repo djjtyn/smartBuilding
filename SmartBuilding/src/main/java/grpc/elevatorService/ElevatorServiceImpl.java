@@ -34,11 +34,6 @@ public final class ElevatorServiceImpl {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_elevatorService_ElevatorResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_elevatorService_OccupantDatabase_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_elevatorService_OccupantDatabase_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -65,14 +60,10 @@ public final class ElevatorServiceImpl {
       "loor\030\003 \001(\005\022\030\n\020destinationFloor\030\004 \003(\005\"T\n\020" +
       "ElevatorResponse\022\027\n\017elevatorMessage\030\001 \001(" +
       "\t\022\024\n\014currentFloor\030\002 \001(\005\022\021\n\tnextFloor\030\003 \001" +
-      "(\005\"?\n\020OccupantDatabase\022+\n\010occupant\030\001 \003(\013" +
-      "2\031.elevatorService.Occupant2\274\001\n\010elevator" +
-      "\022Y\n\014moveElevator\022 .elevatorService.Eleva" +
-      "torRequest\032!.elevatorService.ElevatorRes" +
-      "ponse\"\000(\0010\001\022U\n\023returnToGroundFloor\022\031.ele" +
-      "vatorService.Elevator\032!.elevatorService." +
-      "ElevatorResponse\"\000B-\n\024grpc.elevatorServi" +
-      "ceB\023ElevatorServiceImplP\001b\006proto3"
+      "(\0052e\n\010elevator\022Y\n\014moveElevator\022 .elevato" +
+      "rService.ElevatorRequest\032!.elevatorServi" +
+      "ce.ElevatorResponse\"\000(\0010\001B-\n\024grpc.elevat" +
+      "orServiceB\023ElevatorServiceImplP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -110,12 +101,6 @@ public final class ElevatorServiceImpl {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_elevatorService_ElevatorResponse_descriptor,
         new java.lang.String[] { "ElevatorMessage", "CurrentFloor", "NextFloor", });
-    internal_static_elevatorService_OccupantDatabase_descriptor =
-      getDescriptor().getMessageTypes().get(4);
-    internal_static_elevatorService_OccupantDatabase_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_elevatorService_OccupantDatabase_descriptor,
-        new java.lang.String[] { "Occupant", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

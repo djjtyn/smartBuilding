@@ -209,25 +209,25 @@ StreamObserver<ElevatorResponse> responseObserver = new StreamObserver<ElevatorR
 
 			
 	//Method to return the chosen elevator to the ground floor(UNARY RPC)
-	public static void returnToGroundFloor() {
-		Scanner sc = new Scanner(System.in);
-		System.out.println("What elevator number do you want to perform this operation on?");
-		int elevatorId = sc.nextInt();
-		//Get the index of the elevator chosen
-		int elevatorIndex = linearSearch(elevators, elevatorId);
-		//Get the chosen elevators current floor 
-		int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
-
-		//Request
-		Elevator request = Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor).build();
-		
-		//Response
-		ElevatorResponse response = blockingStub.returnToGroundFloor(request);	
-		System.out.println(response.getElevatorMessage());
-		
-		elevators.get(elevatorIndex).setCurrentFloor(0);
-		
-	}
+//	public static void returnToGroundFloor() {
+//		Scanner sc = new Scanner(System.in);
+//		System.out.println("What elevator number do you want to perform this operation on?");
+//		int elevatorId = sc.nextInt();
+//		//Get the index of the elevator chosen
+//		int elevatorIndex = linearSearch(elevators, elevatorId);
+//		//Get the chosen elevators current floor 
+//		int currentFloor = elevators.get(elevatorIndex).getCurrentFLoor();
+//
+//		//Request
+//		Elevator request = Elevator.newBuilder().setId(elevatorId).setCurrentFloor(currentFloor).build();
+//		
+//		//Response
+//		ElevatorResponse response = blockingStub.returnToGroundFloor(request);	
+//		System.out.println(response.getElevatorMessage());
+//		
+//		elevators.get(elevatorIndex).setCurrentFloor(0);
+//		
+//	}
 }
 	
 

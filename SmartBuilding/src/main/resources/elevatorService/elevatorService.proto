@@ -10,8 +10,6 @@ package elevatorService;
 service elevator{
 	//Bidirectional streaming rpc
 	rpc moveElevator(stream ElevatorRequest) returns (stream ElevatorResponse){}
-	//unary streaming rpc
-	rpc returnToGroundFloor(Elevator) returns (ElevatorResponse){}
 }
 
 //Create the messages
@@ -56,6 +54,3 @@ message ElevatorResponse{
 	int32 nextFloor = 3;
 }
 
-message OccupantDatabase{
-	repeated Occupant occupant = 1;
-}
